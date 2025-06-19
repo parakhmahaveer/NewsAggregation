@@ -52,3 +52,55 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+## Ignore build results
+bin/
+obj/
+out/
+[Bb]uild/
+[Bb]uilds/
+
+## Ignore user-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vscode/
+
+## Ignore Visual Studio Code settings
+.vscode/
+
+## Ignore temporary files
+*.log
+*.tlog
+*.tmp
+
+## Ignore publish outputs
+publish/
+*.dbmdl
+*.pdb
+
+## Ignore NuGet packages
+*.nupkg
+packages/
+*.snupkg
+
+## Ignore Rider IDE files
+.idea/
+
+## ASP.NET specific
+wwwroot/
+appsettings.*.json
+
+## Ignore secrets
+secrets.json
+
+## Entity Framework
+Migrations/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Others
+*.bak

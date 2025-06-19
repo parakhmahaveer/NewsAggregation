@@ -1,0 +1,6 @@
+@NewsAggrigationService_HostAddress = http://localhost:5238
+
+GET {{NewsAggrigationService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

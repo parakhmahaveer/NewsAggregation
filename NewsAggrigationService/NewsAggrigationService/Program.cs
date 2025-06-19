@@ -5,10 +5,14 @@ using Microsoft.OpenApi.Models;
 using NewsAggrigation.BLL;
 using NewsAggrigation.BLL.Services.Auth;
 using NewsAggrigation.BLL.Services.Categorizer;
+using NewsAggrigation.BLL.Services.Catgory;
+using NewsAggrigation.BLL.Services.ExternalApi;
 using NewsAggrigation.BLL.Services.NewsAggregator;
 using NewsAggrigation.BLL.Services.NewsAggregator.ExternalApiHandler;
 using NewsAggrigation.DAL;
 using NewsAggrigation.DAL.Repositories.Auth;
+using NewsAggrigation.DAL.Repositories.CategoryRepo;
+using NewsAggrigation.DAL.Repositories.ExternalApiRepository;
 using System;
 using System.Text;
 
@@ -80,7 +84,11 @@ namespace NewsAggrigationService
 
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IExternalApiService, ExternalApiService>();
+            builder.Services.AddScoped<IExternalApiRepository, ExternalApiRepository>();
             builder.Services.AddScoped<INewsAggregatorService, NewsAggregatorService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             //builder.Services.AddScoped<IExternalNewsApiClient, NewsApiClient>();
             builder.Services.AddScoped<ICategorizerService, CategorizerService>();
             builder.Services.AddScoped<ExternalNewsApiFactoryClient>();

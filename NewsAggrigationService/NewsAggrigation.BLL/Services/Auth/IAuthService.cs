@@ -10,7 +10,7 @@ namespace NewsAggrigation.BLL.Services.Auth
 {
     public interface IAuthService
     {
-        Task<RegisterResponseDto> RegisterAsync(RegisterUserDto dto);
-        Task<AuthResponseDto?> LoginAsync(LoginDto dto);
+        Task<RegisterResponse> RegisterAsync(RegisterUserRequest dto);
+        Task<AuthResponse?> LoginAsync(LoginRequest dto);
     }
 }

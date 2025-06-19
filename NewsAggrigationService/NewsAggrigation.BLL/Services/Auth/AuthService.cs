@@ -24,7 +24,7 @@ namespace NewsAggrigation.BLL.Services.Auth
             _logger = logger;
         }
 
-        public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
+        public async Task<AuthResponse?> LoginAsync(LoginRequest dto)
         {
             try
             {
@@ -33,7 +33,7 @@ namespace NewsAggrigation.BLL.Services.Auth
                     return null;
 
                 var token = _tokenService.CreateToken(user.Username, user.Role);
-                return new AuthResponseDto { Token = token, Username = user.Username };
+                return new AuthResponse { Token = token, Username = user.Username };
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace NewsAggrigation.BLL.Services.Auth
             }
         }
 
-        public async Task<RegisterResponseDto> RegisterAsync(RegisterUserDto dto)
+        public async Task<RegisterResponse> RegisterAsync(RegisterUserRequest dto)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace NewsAggrigation.BLL.Services.Auth
                 await _authRepository.AddUserAsync(user);
                 await _authRepository.SaveChangesAsync();
 
-                return new RegisterResponseDto { Username = user.Username };
+                return new RegisterResponse { Username = user.Username };
             }
             catch (ApplicationException appEx)
             {

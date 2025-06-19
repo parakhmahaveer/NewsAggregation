@@ -23,7 +23,6 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator.ExternalApiHandler
             var url = _source.ApiUrl.Replace("<API_KEY>", _source.ApiKey);
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("User-Agent", "Mozilla/5.0 (compatible; NewsAggregator/1.0)");
-            Console.WriteLine($"[DEBUG] Requesting: {url}");
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 

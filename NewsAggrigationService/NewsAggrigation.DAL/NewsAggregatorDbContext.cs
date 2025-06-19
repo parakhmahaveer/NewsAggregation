@@ -41,6 +41,7 @@ namespace NewsAggrigation.DAL
             modelBuilder.Entity<NotificationSetting>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ExternalAPIConfig>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CategoryKeyword>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Category>().HasQueryFilter(e => !e.IsDeleted);
 
             base.OnModelCreating(modelBuilder);
         }

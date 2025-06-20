@@ -18,7 +18,7 @@ namespace NewsAggrigationClient.Services
         {
             _httpClient = httpClient;
         }
-        public async Task<TokenResponseDto?> LoginAsync()
+        public async Task<TokenResponse?> LoginAsync()
         {
             Console.WriteLine("Enter Username:");
             var username = Console.ReadLine()?.Trim();
@@ -26,7 +26,7 @@ namespace NewsAggrigationClient.Services
             Console.WriteLine("Enter Password:");
             var password = Console.ReadLine()?.Trim();
 
-            var user = new UserLoginDto
+            var user = new UserLogin
             {
                 Username = username,
                 Password = password
@@ -36,7 +36,7 @@ namespace NewsAggrigationClient.Services
 
             if (response.IsSuccessStatusCode)
             {
-                var token = await response.Content.ReadFromJsonAsync<TokenResponseDto>();
+                var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
                 Console.WriteLine($"Login successful. Welcome, {token.Username} ({token.Role})");
                 return token;
             }
@@ -58,7 +58,7 @@ namespace NewsAggrigationClient.Services
             Console.WriteLine("Enter Password:");
             var password = Console.ReadLine()?.Trim();
 
-            var user = new UserRegisterDto
+            var user = new UserRegister
             {
                 Username = username,
                 Email = email,

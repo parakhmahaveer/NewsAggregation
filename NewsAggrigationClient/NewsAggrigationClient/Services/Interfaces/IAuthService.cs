@@ -10,6 +10,6 @@ namespace NewsAggrigationClient.Services.Interfaces
     public interface IAuthService
     {
         Task RegisterAsync();
-        Task<TokenResponseDto?> LoginAsync();
+        Task<TokenResponse?> LoginAsync();
     }
 }

@@ -10,7 +10,7 @@ namespace NewsAggrigation.API.ServiceDTOs.ResponseDTOs
     {
         public int Id { get; set; }
         public string ApiName { get; set; }
-        public string BaseUrl { get; set; }
+        public string ApiKey { get; set; }
         public bool IsActive { get; set; }
         public DateTime LastAccessedAt { get; set; }
     }

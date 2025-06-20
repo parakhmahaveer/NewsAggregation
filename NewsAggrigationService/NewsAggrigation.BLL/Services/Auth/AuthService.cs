@@ -33,7 +33,7 @@ namespace NewsAggrigation.BLL.Services.Auth
                     return null;
 
                 var token = _tokenService.CreateToken(user.Username, user.Role);
-                return new AuthResponse { Token = token, Username = user.Username };
+                return new AuthResponse { Token = token, Username = user.Username, Role = user.Role };
             }
             catch (Exception ex)
             {

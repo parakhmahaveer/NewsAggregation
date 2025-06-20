@@ -7,12 +7,14 @@ using NewsAggrigation.BLL.Services.Auth;
 using NewsAggrigation.BLL.Services.Categorizer;
 using NewsAggrigation.BLL.Services.Catgory;
 using NewsAggrigation.BLL.Services.ExternalApi;
+using NewsAggrigation.BLL.Services.News;
 using NewsAggrigation.BLL.Services.NewsAggregator;
 using NewsAggrigation.BLL.Services.NewsAggregator.ExternalApiHandler;
 using NewsAggrigation.DAL;
+using NewsAggrigation.DAL.Repositories.ArticleRepo;
 using NewsAggrigation.DAL.Repositories.Auth;
 using NewsAggrigation.DAL.Repositories.CategoryRepo;
-using NewsAggrigation.DAL.Repositories.ExternalApiRepository;
+using NewsAggrigation.DAL.Repositories.ExternalApiRepo;
 using System;
 using System.Text;
 
@@ -89,6 +91,8 @@ namespace NewsAggrigationService
             builder.Services.AddScoped<INewsAggregatorService, NewsAggregatorService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+            builder.Services.AddScoped<INewsService, NewsService>();
             //builder.Services.AddScoped<IExternalNewsApiClient, NewsApiClient>();
             builder.Services.AddScoped<ICategorizerService, CategorizerService>();
             builder.Services.AddScoped<ExternalNewsApiFactoryClient>();

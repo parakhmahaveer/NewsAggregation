@@ -20,11 +20,16 @@ namespace NewsAggrigation.BLL.Services.Catgory
             _repository = repository;
         }
 
-        public async Task<CategoryResponse> CreateCategoryAsync(CreateCategoryRequest request)
+        public async Task<IEnumerable<GetCategoriesResponse>> GetAllCategoriesAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<CategoryResponse> CreateCategoryAsync(string categoryName)
         {
             var category = new Category
             {
-                CategoryName = request.CategoryName,
+                CategoryName = categoryName,
                 IsDeleted = false
             };
 
@@ -34,7 +39,6 @@ namespace NewsAggrigation.BLL.Services.Catgory
             {
                 CategoryId = saved.CategoryId,
                 CategoryName = saved.CategoryName,
-                CreatedAt = DateTime.UtcNow,
                 Keywords = new List<string>()
             };
         }
@@ -50,7 +54,6 @@ namespace NewsAggrigation.BLL.Services.Catgory
             {
                 CategoryId = category.CategoryId,
                 CategoryName = category.CategoryName,
-                CreatedAt = DateTime.UtcNow,
                 Keywords = keywords.Select(k => k.KeywordName).ToList()
             };
         }
@@ -67,16 +70,16 @@ namespace NewsAggrigation.BLL.Services.Catgory
             await _repository.AddKeywordsAsync(categoryId, keywords);
         }
 
-        public async Task SoftDeleteCategoryAsync(int categoryId)
+        public async Task DeleteCategoryAsync(int categoryId)
         {
-            var result = await _repository.SoftDeleteCategoryAsync(categoryId);
+            var result = await _repository.DeleteCategoryAsync(categoryId);
             if (!result)
                 throw new NotFoundException($"Category with ID {categoryId} not found.");
         }
 
-        public async Task SoftDeleteKeywordAsync(int keywordId)
+        public async Task DeleteKeywordAsync(int keywordId)
         {
-            var result = await _repository.SoftDeleteKeywordAsync(keywordId);
+            var result = await _repository.DeleteKeywordAsync(keywordId);
             if (!result)
                 throw new NotFoundException($"Keyword with ID {keywordId} not found.");
         }

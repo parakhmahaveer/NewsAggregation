@@ -2,7 +2,7 @@
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
-using NewsAggrigation.DAL.Repositories.ExternalApiRepository;
+using NewsAggrigation.DAL.Repositories.ExternalApiRepo;
 using SendGrid.Helpers.Errors.Model;
 using System;
 using System.Collections.Generic;
@@ -74,7 +74,7 @@ namespace NewsAggrigation.BLL.Services.ExternalApi
             {
                 Id = config.ExternalAPIId,
                 ApiName = config.Name,
-                BaseUrl = config.ApiUrl,
+                ApiKey = config.ApiKey,
                 IsActive = config.IsEnable,
                 LastAccessedAt = config.LastAccessedDate
             };

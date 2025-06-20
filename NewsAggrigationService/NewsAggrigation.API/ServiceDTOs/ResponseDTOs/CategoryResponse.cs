@@ -11,6 +11,5 @@ namespace NewsAggrigation.API.ServiceDTOs.ResponseDTOs
         public int CategoryId { get; set; }
         public string CategoryName { get; set; }
         public List<string> Keywords { get; set; }
-        public DateTime CreatedAt { get; set; }
     }
 }

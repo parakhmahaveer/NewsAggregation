@@ -2,11 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.BLL.Services.ExternalApi;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NewsAggrigation.Controller
 {
@@ -25,36 +20,71 @@ namespace NewsAggrigation.Controller
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _service.GetAllAsync();
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetAllAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _service.GetByIdAsync(id);
-            return result != null ? Ok(result) : NotFound();
+            try
+            {
+                var result = await _service.GetByIdAsync(id);
+                return result != null ? Ok(result) : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ExternalApiRequest dto)
         {
-            var result = await _service.AddAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            try
+            {
+                var result = await _service.AddAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] ExternalApiUpdateRequest dto)
         {
-            var result = await _service.UpdateAsync(id, dto);
-            return result != null ? Ok(result) : NotFound();
+            try
+            {
+                var result = await _service.UpdateAsync(id, dto);
+                return result != null ? Ok(result) : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _service.DeleteAsync(id);
-            return success ? NoContent() : NotFound();
+            try
+            {
+                var success = await _service.DeleteAsync(id);
+                return success ? NoContent() : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

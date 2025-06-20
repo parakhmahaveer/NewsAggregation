@@ -6,14 +6,27 @@ using System.Threading.Tasks;
 
 namespace NewsAggrigationClient.Configuration
 {
-    public class HttpClientFactory
+    public static class HttpClientFactory
     {
-        public static HttpClient CreateClient()
+        private static HttpClient _client;
+
+        public static HttpClient CreateClient(string token = null)
         {
-            return new HttpClient
+            if (_client == null)
             {
-                BaseAddress = new Uri("https://localhost:44313/api")
-            };
+                _client = new HttpClient
+                {
+                    BaseAddress = new Uri("https://localhost:44313/api")
+                };
+            }
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                _client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            return _client;
         }
     }
 }

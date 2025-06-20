@@ -22,39 +22,88 @@ namespace NewsAggrigation.Controller
             _service = service;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
+        [HttpGet]
+        public async Task<IActionResult> GetAllCategories()
         {
-            var result = await _service.CreateCategoryAsync(request);
-            return CreatedAtAction(nameof(GetCategory), new { id = result.CategoryId }, result);
+            try
+            {
+                var result = await _service.GetAllCategoriesAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory([FromQuery] string category)
+        {
+            try
+            {
+                var result = await _service.CreateCategoryAsync(category);
+                return CreatedAtAction(nameof(GetCategory), new { id = result.CategoryId }, result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCategory(int id)
         {
-            var result = await _service.GetCategoryWithKeywordsAsync(id);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetCategoryWithKeywordsAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost("{id}/keywords")]
         public async Task<IActionResult> AddKeywords(int id, [FromBody] CreateKeywordRequest request)
         {
-            await _service.AddKeywordsAsync(id, request);
-            return Ok(new { Message = "Keywords added successfully." });
+            try
+            {
+                await _service.AddKeywordsAsync(id, request);
+                return Ok(new { Message = "Keywords added successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> SoftDeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
-            await _service.SoftDeleteCategoryAsync(id);
-            return NoContent();
+            try
+            {
+                await _service.DeleteCategoryAsync(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpDelete("keywords/{id}")]
-        public async Task<IActionResult> SoftDeleteKeyword(int id)
+        public async Task<IActionResult> DeleteKeyword(int id)
         {
-            await _service.SoftDeleteKeywordAsync(id);
-            return NoContent();
+            try
+            {
+                await _service.DeleteKeywordAsync(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

@@ -10,10 +10,11 @@ namespace NewsAggrigation.BLL.Services.Catgory
 {
     public interface ICategoryService
     {
-        Task<CategoryResponse> CreateCategoryAsync(CreateCategoryRequest request);
+        Task<IEnumerable<GetCategoriesResponse>> GetAllCategoriesAsync();
+        Task<CategoryResponse> CreateCategoryAsync(string category);
         Task<CategoryResponse> GetCategoryWithKeywordsAsync(int categoryId);
         Task AddKeywordsAsync(int categoryId, CreateKeywordRequest request);
-        Task SoftDeleteCategoryAsync(int categoryId);
-        Task SoftDeleteKeywordAsync(int keywordId);
+        Task DeleteCategoryAsync(int categoryId);
+        Task DeleteKeywordAsync(int keywordId);
     }
 }

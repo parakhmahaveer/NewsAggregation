@@ -11,7 +11,7 @@ namespace NewsAggrigationClient
         {
             var httpClient = HttpClientFactory.CreateClient();
             IAuthService authService = new AuthService(httpClient);
-            var menu = new MenuService(authService);
+            var menu = new MainMenu(authService);
 
             menu.ShowMainMenuAsync().GetAwaiter().GetResult();
         }

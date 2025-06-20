@@ -18,16 +18,30 @@ namespace NewsAggrigation.Controller
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterUserRequest dto)
         {
-            var result = await _authService.RegisterAsync(dto);
-            return Ok(result);
+            try
+            {
+                var result = await _authService.RegisterAsync(dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginRequest dto)
         {
-            var result = await _authService.LoginAsync(dto);
-            if (result == null) return Unauthorized();
-            return Ok(result);
+            try
+            {
+                var result = await _authService.LoginAsync(dto);
+                if (result == null) return Unauthorized();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

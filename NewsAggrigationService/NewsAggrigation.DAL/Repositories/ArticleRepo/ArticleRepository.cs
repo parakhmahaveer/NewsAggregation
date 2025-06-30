@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
@@ -61,38 +62,39 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
                 .ToListAsync();
         }
 
-        public async Task<List<Article>> SearchArticlesAsync(string query, DateTime? start, DateTime? end, string? sortBy)
+        public async Task<List<NewsResponse>> SearchArticlesAsync(SearchRequest request)
         {
-            var articlesQuery = _context.Articles.AsQueryable();
-
-            if (!string.IsNullOrEmpty(query))
+            if (!DateTime.TryParse(request.StartDate, out var startDate) || !DateTime.TryParse(request.EndDate, out var endDate))
             {
-                articlesQuery = articlesQuery.Where(a =>
-                    a.Title.ToLower().Contains(query.ToLower()) ||
-                    a.Content.ToLower().Contains(query.ToLower()));
+                throw new ArgumentException("Invalid date range.");
             }
 
-            if (start.HasValue)
+            var query = _context.Articles
+                .Where(a =>
+                    !a.IsDeleted &&
+                    a.PublishedDate >= startDate &&
+                    a.PublishedDate <= endDate &&
+                    (a.Title.Contains(request.Query) || a.Content.Contains(request.Query)));
+
+            if (request.SortBy?.ToLower() == "likes")
             {
-                articlesQuery = articlesQuery.Where(a => a.PublishedDate >= start.Value);
+                query = query.OrderByDescending(a => a.LikeCount);
+            }
+            else if (request.SortBy?.ToLower() == "dislikes")
+            {
+                query = query.OrderByDescending(a => a.DisLikeCount);
             }
 
-            if (end.HasValue)
+            return await query.Select(a => new NewsResponse
             {
-                articlesQuery = articlesQuery.Where(a => a.PublishedDate <= end.Value);
-            }
-
-            if (!string.IsNullOrEmpty(sortBy))
-            {
-                articlesQuery = sortBy.ToLower() switch
-                {
-                    "title" => articlesQuery.OrderBy(a => a.Title),
-                    "date" => articlesQuery.OrderBy(a => a.PublishedDate),
-                    _ => articlesQuery
-                };
-            }
-
-            return await articlesQuery.ToListAsync();
+                ArticleId = a.ArticleId,
+                Title = a.Title,
+                Url = a.Url,
+                Source = a.Source,
+                Category = a.Category.CategoryName,
+                LikeCount = a.LikeCount,
+                DislikeCount = a.DisLikeCount
+            }).ToListAsync();
         }
 
         public async Task SaveArticleAsync(string username, int articleId)
@@ -147,6 +149,26 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
                     Category = a.Article.Category.CategoryName
                 })
                 .ToListAsync();
+        }
+
+        public async Task<bool> SetArticleReactionByArticleIdAsync(ArticleReactionRequest request)
+        {
+            var userId = (await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username)).UserId;
+            var article = await _context.Articles.FirstOrDefaultAsync(a => a.ArticleId == request.ArticleId);
+            if (article != null)
+            {
+                if (request.IsLiked)
+                {
+                    article.LikeCount++;
+                }
+                else
+                {
+                    article.DisLikeCount++;
+                }
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

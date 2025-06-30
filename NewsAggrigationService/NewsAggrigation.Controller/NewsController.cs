@@ -63,16 +63,12 @@ namespace NewsAggrigation.Controller
             }
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> SearchNews(
-            [FromQuery] string query,
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
-            [FromQuery] string? sortBy)
+        [HttpPost("search")]
+        public async Task<IActionResult> SearchNews([FromBody] SearchRequest request)
         {
             try
             {
-                var articles = await _newsService.SearchNewsAsync(query, startDate, endDate, sortBy);
+                var articles = await _newsService.SearchNewsAsync(request);
                 return Ok(articles);
             }
             catch (Exception ex)
@@ -96,6 +92,22 @@ namespace NewsAggrigation.Controller
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("react")]
+        public async Task<IActionResult> SetArticleReaction([FromBody] ArticleReactionRequest request)
+        {
+            try
+            {
+                var result = await _newsService.SetArticleReactionAsync(request);
+                if (!result)
+                    return BadRequest("Could not update feedback.");
+                return Ok(request.IsLiked ? "Article liked." : "Article disliked.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
             }
         }
 

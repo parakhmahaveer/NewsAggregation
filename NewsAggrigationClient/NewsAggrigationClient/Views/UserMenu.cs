@@ -43,7 +43,7 @@ namespace NewsAggrigationClient.Views
                         break;
 
                     case "3":
-                        //await _userOperation.SearchArticlesAsync();
+                        await _userOperation.SearchArticlesAsync();
                         break;
 
                     case "4":
@@ -164,7 +164,8 @@ namespace NewsAggrigationClient.Views
         {
             Console.WriteLine("\nOptions:");
             Console.WriteLine("1. Save Article");
-            Console.WriteLine("2. Back");
+            Console.WriteLine("2. Like or Dislike");
+            Console.WriteLine("3. Back");
 
             var option = Console.ReadLine();
             if (option == "1")
@@ -173,10 +174,13 @@ namespace NewsAggrigationClient.Views
             }
             else if (option == "2")
             {
+                await _userOperation.ReactToArticleAsync();
+            }
+            else if(option == "3")
+            {
                 return false;
             }
-
-            return true;
+                return true;
         }
 
         private async Task ShowSavedArticlesMenuAsync()

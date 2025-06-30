@@ -22,7 +22,7 @@ namespace NewsAggrigationClient.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine("❌ Failed to fetch today's news.");
+                Console.WriteLine("Failed to fetch today's news.");
                 return;
             }
 
@@ -189,6 +189,117 @@ namespace NewsAggrigationClient.Services
                 Console.WriteLine($"Description: {article.Content}");
                 Console.WriteLine($"Source     : {article.Source}");
                 Console.WriteLine($"URL        : {article.Url}");
+                Console.WriteLine($"Category   : {article.Category}");
+            }
+        }
+
+        public async Task ReactToArticleAsync()
+        {
+            Console.Write("Enter the Article ID to react: ");
+            var articleIdInput = Console.ReadLine();
+
+            if (!int.TryParse(articleIdInput, out int articleId))
+            {
+                Console.WriteLine("Invalid article ID.");
+                return;
+            }
+
+            Console.Write("Do you want to like or dislike? (like/dislike): ");
+            var input = Console.ReadLine()?.Trim().ToLower();
+
+            bool isLiked;
+            if (input == "like")
+            {
+                isLiked = true;
+            }
+            else if (input == "dislike")
+            {
+                isLiked = false;
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Type 'like' or 'dislike'.");
+                return;
+            }
+
+            var request = new ArticleReactionRequest
+            {
+                Username = _username,
+                IsLiked = isLiked,
+                ArticleId = articleId
+            };
+
+            var response = await _httpClient.PostAsJsonAsync($"api/news/react", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"{message}");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Failed to react. {response.StatusCode}: {error}");
+            }
+        }
+
+        public async Task SearchArticlesAsync()
+        {
+            Console.Write("Enter search query: ");
+            var query = Console.ReadLine();
+
+            Console.Write("Enter start date (yyyy-MM-dd): ");
+            var start = Console.ReadLine();
+
+            Console.Write("Enter end date (yyyy-MM-dd): ");
+            var end = Console.ReadLine();
+
+            Console.Write("Sort by (likes/dislikes): ");
+            var sort = Console.ReadLine()?.ToLower();
+
+            // Validate input
+            if (!DateTime.TryParse(start, out _) || !DateTime.TryParse(end, out _))
+            {
+                Console.WriteLine("Invalid date format.");
+                return;
+            }
+
+            var request = new SearchRequest
+            {
+                Query = query,
+                StartDate = start,
+                EndDate = end,
+                SortBy = sort
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("api/news/search", request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Search failed: {response.StatusCode}");
+                return;
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (articles == null || articles.Count == 0)
+            {
+                Console.WriteLine("No articles found.");
+                return;
+            }
+
+            Console.WriteLine("\n Search Results:");
+            foreach (var article in articles)
+            {
+                Console.WriteLine($"\nID         : {article.ArticleId}");
+                Console.WriteLine($"Title      : {article.Title}");
+                Console.WriteLine($"Source     : {article.Source}");
+                Console.WriteLine($"URL        : {article.Url}");
+                Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
                 Console.WriteLine($"Category   : {article.Category}");
             }
         }

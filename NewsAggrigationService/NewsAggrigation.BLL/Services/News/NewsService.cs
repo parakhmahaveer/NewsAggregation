@@ -56,11 +56,11 @@ namespace NewsAggrigation.BLL.Services.News
             }
         }
 
-        public async Task<List<Article>> SearchNewsAsync(string query, DateTime? startDate, DateTime? endDate, string? sortBy)
+        public async Task<List<NewsResponse>> SearchNewsAsync(SearchRequest request)
         {
             try
             {
-                return await _articleRepository.SearchArticlesAsync(query, startDate, endDate, sortBy);
+                return await _articleRepository.SearchArticlesAsync(request);
             }
             catch (Exception ex)
             {
@@ -81,6 +81,11 @@ namespace NewsAggrigation.BLL.Services.News
         public async Task<List<NewsResponse>> GetSavedArticlesAsync(string username)
         {
             return await _articleRepository.GetSavedArticlesByUserIdAsync(username);
+        }
+
+        public async Task<bool> SetArticleReactionAsync(ArticleReactionRequest request)
+        {
+            return await _articleRepository.SetArticleReactionByArticleIdAsync(request);
         }
     }
 }

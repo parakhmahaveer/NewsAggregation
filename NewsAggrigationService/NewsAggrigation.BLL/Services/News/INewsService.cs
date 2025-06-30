@@ -14,9 +14,10 @@ namespace NewsAggrigation.BLL.Services.News
         Task<List<NewsResponse>> GetTodaysNewsAsync();
         Task<List<NewsResponse>> GetNewsByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<List<NewsResponse>> GetTodaysNewsByCategoryAsync(NewsByCategoryRequest request);
-        Task<List<Article>> SearchNewsAsync(string query, DateTime? startDate, DateTime? endDate, string? sortBy);
+        Task<List<NewsResponse>> SearchNewsAsync(SearchRequest request);
         Task SaveArticleAsync(string username, int articleId);
         Task<bool> UnsaveArticleAsync(string username, int articleId);
+        Task<bool> SetArticleReactionAsync(ArticleReactionRequest request);
         Task<List<NewsResponse>> GetSavedArticlesAsync(string username);
     }
 }

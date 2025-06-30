@@ -14,5 +14,7 @@ namespace NewsAggrigation.API.ServiceDTOs.ResponseDTOs
         public string Url { get; set; }
         public string Source { get; set; }
         public string Category { get; set; }
+        public int LikeCount { get; set; }
+        public int DislikeCount { get; set; }
     }
 }

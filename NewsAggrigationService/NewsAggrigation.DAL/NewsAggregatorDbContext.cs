@@ -24,11 +24,13 @@ namespace NewsAggrigation.DAL
 
         public DbSet<Keyword> Keywords { get; set; }
 
-        public DbSet<NotificationSetting> NotificationSettings { get; set; }
+        public DbSet<CategoryNotificationSetting> CategoryNotificationSettings { get; set; }
 
         public DbSet<ExternalAPIConfig> ExternalAPIConfigs { get; set; }
 
         public DbSet<CategoryKeyword> CategoryKeywords { get; set; }
+
+        public DbSet<KeywordNotificationSetting> KeywordNotificationSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,10 +40,11 @@ namespace NewsAggrigation.DAL
             modelBuilder.Entity<Notification>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Keyword>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<SavedArticle>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<NotificationSetting>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CategoryNotificationSetting>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<ExternalAPIConfig>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<CategoryKeyword>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Category>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<KeywordNotificationSetting>().HasQueryFilter(e => !e.IsDeleted);
 
             base.OnModelCreating(modelBuilder);
         }

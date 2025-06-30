@@ -13,6 +13,8 @@ namespace NewsAggrigationClient.Services.Interfaces
         Task SaveArticleAsync();
         Task DeleteSavedArticleAsync();
         Task ViewSavedArticlesAsync();
+        Task ReactToArticleAsync();
+        Task SearchArticlesAsync();
         Task ViewHeadlinesAsync(NewsByCategoryRequest request);
     }
 }

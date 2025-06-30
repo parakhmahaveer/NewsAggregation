@@ -16,6 +16,8 @@ namespace NewsAggrigation.DAL.Models
         public string Url { get; set; }
         public string Source { get; set; }
         public DateTime PublishedDate { get; set; }
+        public int LikeCount { get; set; }
+        public int DisLikeCount { get; set; }
         public bool IsDeleted { get; set; }
 
         public int CategoryId { get; set; }

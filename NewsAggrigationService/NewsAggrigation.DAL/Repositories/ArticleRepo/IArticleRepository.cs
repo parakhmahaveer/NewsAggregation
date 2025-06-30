@@ -1,4 +1,5 @@
-﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+﻿using Azure.Core;
+using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
 using System;
@@ -13,9 +14,10 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
     {
         Task<List<NewsResponse>> GetArticlesByDateRangeAsync(DateTime start, DateTime end);
         Task<List<NewsResponse>> GetArticlesByCategoryAndDateAsync(NewsByCategoryRequest request);
-        Task<List<Article>> SearchArticlesAsync(string query, DateTime? start, DateTime? end, string? sortBy);
+        Task<List<NewsResponse>> SearchArticlesAsync(SearchRequest request);
         Task SaveArticleAsync(string username, int articleId);
         Task<bool> DeleteSavedArticleAsync(string username, int articleId);
         Task<List<NewsResponse>> GetSavedArticlesByUserIdAsync(string username);
+        Task<bool> SetArticleReactionByArticleIdAsync(ArticleReactionRequest request);
     }
 }

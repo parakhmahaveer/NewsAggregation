@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.BLL.Services.News;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,11 @@ namespace NewsAggrigation.Controller
     public class NewsController: ControllerBase
     {
         private readonly INewsService _newsService;
-        public NewsController (INewsService newsService)
+        private readonly IUserIdentityContext _userIdentityContext;
+        public NewsController (INewsService newsService, IUserIdentityContext userIdentityContext)
         {
             _newsService = newsService;
+            _userIdentityContext = userIdentityContext;
         }
 
         [HttpGet("today")]
@@ -127,12 +130,13 @@ namespace NewsAggrigation.Controller
         }
 
         [HttpPost("{articleId}/report")]
-        [Authorize]
-        public async Task<IActionResult> ReportArticle(int articleId, [FromBody] string username)
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> ReportArticle(int articleId)
         {
             try
             {
-                await _newsService.ReportArticleAsync(articleId, username);
+                var userId = _userIdentityContext.UserId;
+                await _newsService.ReportArticleAsync(articleId, userId);
                 return Ok(new { Message = "Article reported successfully." });
             }
             catch (Exception ex)

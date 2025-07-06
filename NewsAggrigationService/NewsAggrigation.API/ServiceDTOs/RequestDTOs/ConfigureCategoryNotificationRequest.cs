@@ -8,7 +8,7 @@ namespace NewsAggrigation.API.ServiceDTOs.RequestDTOs
 {
     public class ConfigureCategoryNotificationRequest
     {
-        public string Username { get; set; }
+        public int UserId { get; set; } = 0;
         public Dictionary<string, bool> CategorySettings { get; set; }
     }
 }

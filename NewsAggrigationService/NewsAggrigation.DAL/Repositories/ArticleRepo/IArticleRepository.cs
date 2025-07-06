@@ -20,7 +20,7 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         Task<List<NewsResponse>> GetSavedArticlesByUserIdAsync(string username);
         Task<bool> SetArticleReactionByArticleIdAsync(ArticleReactionRequest request);
         Task<List<Article>> GetReportedArticlesAsync();
-        Task ReportArticleAsync(int articleId, string username);
+        Task ReportArticleAsync(int articleId, int userId);
         Task<int> GetReportCountAsync(int articleId);
         Task HideArticleAsync(Article article);
         Task UnhideArticleAsync(Article article);

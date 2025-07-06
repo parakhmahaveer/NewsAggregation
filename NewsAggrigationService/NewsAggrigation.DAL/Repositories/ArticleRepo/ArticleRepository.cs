@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
@@ -176,14 +175,29 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
             throw new NotImplementedException();
         }
 
-        public Task ReportArticleAsync(int articleId, string username)
+        public async Task ReportArticleAsync(int articleId, int userId)
         {
-            throw new NotImplementedException();
+            var reportedArticle = new ReportedArticle
+            {
+                ArticleId = articleId,
+            };
+            reportedArticle.ReportCount++;
+            _context.ReportedArticles.Add(reportedArticle);
+
+            var userArticleActivity = new UserArticleActivity
+            {
+                ArticleId = articleId,
+                IsFlagged = true,
+                UserId = userId
+            };
+            _context.UserArticleActivity.Add(userArticleActivity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<int> GetReportCountAsync(int articleId)
         {
-            return await _context.ReportedArticles.CountAsync(r => r.ArticleId == articleId);
+            var reportedArticle = await _context.ReportedArticles.FirstOrDefaultAsync(r => r.ArticleId == articleId);
+            return reportedArticle.ReportCount;
         }
 
         public async Task HideArticleAsync(Article article)

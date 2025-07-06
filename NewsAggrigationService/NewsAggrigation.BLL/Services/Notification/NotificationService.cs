@@ -1,5 +1,6 @@
 ﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.DAL.Models;
 using NewsAggrigation.DAL.Repositories.NotificationRepo;
 
@@ -8,10 +9,12 @@ namespace NewsAggrigation.BLL.Services.Notification
     public class NotificationService : INotificationService
     {
         public INotificationRepository _notificationRepo;
+        private readonly IUserIdentityContext _userIdentityContext;
 
-        public NotificationService(INotificationRepository notificationRepo)
+        public NotificationService(INotificationRepository notificationRepo, IUserIdentityContext userIdentityContext)
         {
             _notificationRepo = notificationRepo;
+            _userIdentityContext = userIdentityContext;
         }
 
         public async Task<List<NotificationResponse>> GetUserNotificationsAsync(string username)
@@ -30,20 +33,17 @@ namespace NewsAggrigation.BLL.Services.Notification
 
         public async Task ConfigureCategoryNotificationAsync(ConfigureCategoryNotificationRequest request)
         {
-            var user = await _notificationRepo.GetUserByUsernameAsync(request.Username)
-                       ?? throw new ArgumentException("User not found");
-
             foreach (var pair in request.CategorySettings)
             {
                 var category = await _notificationRepo.GetCategoryByNameAsync(pair.Key);
                 if (category == null) continue;
 
-                var existingSetting = await _notificationRepo.GetCategorySettingAsync(user.UserId, category.CategoryId);
+                var existingSetting = await _notificationRepo.GetCategorySettingAsync(request.UserId, category.CategoryId);
                 if (existingSetting == null)
                 {
                     await _notificationRepo.AddCategorySettingAsync(new CategoryNotificationSetting
                     {
-                        UserId = user.UserId,
+                        UserId = request.UserId,
                         CategoryId = category.CategoryId,
                         IsEnabled = pair.Value,
                         IsDeleted = false

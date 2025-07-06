@@ -92,12 +92,12 @@ namespace NewsAggrigation.BLL.Services.News
             return await _articleRepository.SetArticleReactionByArticleIdAsync(request);
         }
 
-        public async Task ReportArticleAsync(int articleId, string username)
+        public async Task ReportArticleAsync(int articleId, int userId)
         {
             var article = await _articleRepository.GetByIdAsync(articleId)
                           ?? throw new ArgumentException("Article not found");
 
-            await _articleRepository.ReportArticleAsync(articleId, username);
+            await _articleRepository.ReportArticleAsync(articleId, userId);
             int autoHideThresholdCount = Convert.ToInt32(_configuration["AutoHideThresholdCount"]);
             var reportCount = await _articleRepository.GetReportCountAsync(articleId);
             if (reportCount >= autoHideThresholdCount)

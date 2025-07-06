@@ -63,6 +63,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
+                request.UserId = _userIdentityContext.UserId;
                 await _notificationService.ConfigureCategoryNotificationAsync(request);
                 return Ok(new { Message = "Category notification settings updated." });
             }

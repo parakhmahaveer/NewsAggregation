@@ -19,7 +19,7 @@ namespace NewsAggrigation.BLL.Services.News
         Task<bool> UnsaveArticleAsync(string username, int articleId);
         Task<bool> SetArticleReactionAsync(ArticleReactionRequest request);
         Task<List<NewsResponse>> GetSavedArticlesAsync(string username);
-        Task ReportArticleAsync(int articleId, string username);
+        Task ReportArticleAsync(int articleId, int userId);
         Task<List<NewsResponse>> GetReportedArticlesAsync();
         Task<bool> HideArticleAsync(int articleId);
         Task<bool> UnhideArticleAsync(int articleId);

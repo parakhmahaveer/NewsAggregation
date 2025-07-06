@@ -9,7 +9,7 @@ namespace NewsAggrigation.BLL.Services.Helper.UserIdentity
 
         public UserIdentityContext(IHttpContextAccessor accessor)
         {
-            var userIdClaim = accessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = accessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
 
             if (!int.TryParse(userIdClaim, out int userId))
                 throw new ApiExceptionHelper("Invalid or missing user ID", 401);

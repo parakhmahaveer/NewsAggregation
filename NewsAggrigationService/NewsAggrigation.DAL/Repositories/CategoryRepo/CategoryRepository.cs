@@ -81,5 +81,52 @@ namespace NewsAggrigation.DAL.Repositories.CategoryRepo
                 .Where(k => k.CategoryId == categoryId && !k.IsDeleted)
                 .ToListAsync();
         }
+
+        public async Task<Category?> GetByIdAsync(int categoryId)
+        {
+            return await _context.Categories.FindAsync(categoryId);
+        }
+
+        public async Task HideCategoryAsync(Category category)
+        {
+            category.IsDeleted = true;
+
+            var relatedArticles = await _context.Articles
+                .Where(a => a.CategoryId == category.CategoryId)
+                .ToListAsync();
+
+            foreach (var article in relatedArticles)
+                article.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UnhideCategoryAsync(Category category)
+        {
+            category.IsDeleted = false;
+
+            var relatedArticles = await _context.Articles
+                .Where(a => a.CategoryId == category.CategoryId)
+                .ToListAsync();
+
+            foreach (var article in relatedArticles)
+                article.IsDeleted = false;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> BlockArticlesByKeywordAsync(string keyword)
+        {
+            var articlesToBlock = await _context.Articles.Where(a => a.Content.ToLower().Contains(keyword.ToLower())).ToListAsync();
+
+            foreach (var article in articlesToBlock)
+            {
+                article.IsDeleted = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return articlesToBlock.Count;
+        }
     }
 }

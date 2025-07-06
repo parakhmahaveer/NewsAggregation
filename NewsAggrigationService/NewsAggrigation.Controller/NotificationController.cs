@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.BLL.Services.Helper;
+using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.BLL.Services.Notification;
 using System;
 using System.Collections.Generic;
@@ -15,23 +18,12 @@ namespace NewsAggrigation.Controller
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
+        private readonly IUserIdentityContext _userIdentityContext;
 
-        public NotificationController(INotificationService notificationService)
+        public NotificationController(INotificationService notificationService, IUserIdentityContext userIdentityContext)
         {
             _notificationService = notificationService;
-        }
-        [HttpGet]
-        public async Task<IActionResult> GetNotifications()
-        {
-            try
-            {
-                var notifications = await _notificationService.GetUserNotificationsAsync(userId);
-                return Ok(notifications);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Failed to get notifications: {ex.Message}");
-            }
+            _userIdentityContext = userIdentityContext;
         }
 
         [HttpGet("config")]
@@ -39,41 +31,58 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                var config = await _notificationService.GetUserNotificationConfigAsync(userId);
+                var config = await _notificationService.GetUserNotificationConfigAsync(_userIdentityContext.UserId);
                 return Ok(new { categories = config.Categories, keywords = config.Keywords });
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to get notification config: {ex.Message}");
+                return StatusCode(500, new { Message = "Unexpected error occurred: " + ex.Message });
             }
         }
 
-        [HttpPut("config/category")]
-        public async Task<IActionResult> SetCategory([FromBody] CategoryConfigDto dto)
+        [HttpGet("{username}")]
+        public async Task<IActionResult> GetUserNotifications(string username)
         {
             try
             {
-                var result = await _notificationService.SetCategoryNotificationAsync(userId, dto.Category, dto.Enabled);
-                if (!result) return BadRequest("Category not found.");
-                return Ok();
+                var result = await _notificationService.GetUserNotificationsAsync(username);
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to update category notification: {ex.Message}");
+                return StatusCode(500, new { Message = "Failed to fetch notifications.", Details = ex.Message });
             }
         }
 
-        [HttpPut("config/keywords")]
-        public async Task<IActionResult> SetKeywords([FromBody] KeywordsConfigDto dto)
+        [HttpPost("configure/category")]
+        public async Task<IActionResult> ConfigureCategoryNotification([FromBody] ConfigureCategoryNotificationRequest request)
         {
             try
             {
-                await _notificationService.SetKeywordNotificationsAsync(userId, dto.Keywords);
-                return Ok();
+                await _notificationService.ConfigureCategoryNotificationAsync(request);
+                return Ok(new { Message = "Category notification settings updated." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to update keyword notifications: {ex.Message}");
+                return StatusCode(500, new { Message = "Failed to configure category notifications.", Details = ex.Message });
+            }
+        }
+
+        [HttpPost("configure/keyword")]
+        public async Task<IActionResult> ConfigureKeywordNotification([FromBody] ConfigureKeywordNotificationRequest request)
+        {
+            try
+            {
+                await _notificationService.ConfigureKeywordNotificationAsync(request);
+                return Ok(new { Message = "Keyword notification settings updated." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to configure keyword notifications.", Details = ex.Message });
             }
         }
     }

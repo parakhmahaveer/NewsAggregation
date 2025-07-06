@@ -66,5 +66,21 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<string>> GetUserCategoryNotificationPreferencesAsync(int userId)
+        {
+            return await _context.CategoryNotificationSettings
+                .Where(c => c.UserId == userId && c.IsEnabled && !c.IsDeleted)
+                .Select(c => c.Category.CategoryName)
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetUserKeywordNotificationPreferencesAsync(int userId)
+        {
+            return await _context.Keywords
+                .Where(k => k.UserId == userId && k.IsEnabled && !k.IsDeleted)
+                .Select(k => k.Word)
+                .ToListAsync();
+        }
     }
 }

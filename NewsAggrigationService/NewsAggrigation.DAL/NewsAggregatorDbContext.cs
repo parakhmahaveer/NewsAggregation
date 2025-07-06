@@ -32,6 +32,10 @@ namespace NewsAggrigation.DAL
 
         public DbSet<KeywordNotificationSetting> KeywordNotificationSettings { get; set; }
 
+        public DbSet<ReportedArticle> ReportedArticles { get; set; }
+
+        public DbSet<UserArticleActivity> UserArticleActivity { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Apply soft delete global filters

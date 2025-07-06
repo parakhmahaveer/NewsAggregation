@@ -1,9 +1,4 @@
 ﻿using NewsAggrigation.DAL.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NewsAggrigation.DAL.Repositories.NotificationRepo
 {
@@ -18,5 +13,7 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
         Task AddKeywordsAsync(IEnumerable<Keyword> keywords);
         Task RemoveKeywordsAsync(IEnumerable<Keyword> keywords);
         Task SaveChangesAsync();
+        Task<List<string>> GetUserCategoryNotificationPreferencesAsync(int userId);
+        Task<List<string>> GetUserKeywordNotificationPreferencesAsync(int userId);
     }
 }

@@ -32,7 +32,7 @@ namespace NewsAggrigation.BLL.Services.Auth
                 if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                     return null;
 
-                var token = _tokenService.CreateToken(user.Username, user.Role);
+                var token = _tokenService.CreateToken(user.UserId, user.Username, user.Role);
                 return new AuthResponse { Token = token, Username = user.Username, Role = user.Role };
             }
             catch (Exception ex)

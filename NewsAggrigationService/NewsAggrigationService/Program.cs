@@ -7,14 +7,17 @@ using NewsAggrigation.BLL.Services.Auth;
 using NewsAggrigation.BLL.Services.Categorizer;
 using NewsAggrigation.BLL.Services.Catgory;
 using NewsAggrigation.BLL.Services.ExternalApi;
+using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.BLL.Services.News;
 using NewsAggrigation.BLL.Services.NewsAggregator;
 using NewsAggrigation.BLL.Services.NewsAggregator.ExternalApiHandler;
+using NewsAggrigation.BLL.Services.Notification;
 using NewsAggrigation.DAL;
 using NewsAggrigation.DAL.Repositories.ArticleRepo;
 using NewsAggrigation.DAL.Repositories.Auth;
 using NewsAggrigation.DAL.Repositories.CategoryRepo;
 using NewsAggrigation.DAL.Repositories.ExternalApiRepo;
+using NewsAggrigation.DAL.Repositories.NotificationRepo;
 using System;
 using System.Text;
 
@@ -27,7 +30,7 @@ namespace NewsAggrigationService
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddDbContext<NewsAggregatorDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("NewsAggregatorDB")));
+            builder.Services.AddDbContext<NewsAggregatorDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("NewsAggregator")));
 
             builder.Services.AddControllers();
             builder.Services.AddAuthentication(options =>
@@ -93,6 +96,9 @@ namespace NewsAggrigationService
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<INewsService, NewsService>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IUserIdentityContext, UserIdentityContext>();
             //builder.Services.AddScoped<IExternalNewsApiClient, NewsApiClient>();
             builder.Services.AddScoped<ICategorizerService, CategorizerService>();
             builder.Services.AddScoped<ExternalNewsApiFactoryClient>();

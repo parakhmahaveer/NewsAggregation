@@ -1,4 +1,5 @@
-﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+﻿using Microsoft.Extensions.Configuration;
+using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
 using NewsAggrigation.DAL.Repositories.ArticleRepo;
@@ -13,9 +14,12 @@ namespace NewsAggrigation.BLL.Services.News
     public class NewsService : INewsService
     {
         private readonly IArticleRepository _articleRepository;
-        public NewsService (IArticleRepository articleRepository)
+        private readonly IConfiguration _configuration;
+
+        public NewsService (IArticleRepository articleRepository, IConfiguration configuration)
         {
             _articleRepository = articleRepository;
+            _configuration = configuration;
         }
 
         public async Task<List<NewsResponse>> GetTodaysNewsAsync()
@@ -86,6 +90,53 @@ namespace NewsAggrigation.BLL.Services.News
         public async Task<bool> SetArticleReactionAsync(ArticleReactionRequest request)
         {
             return await _articleRepository.SetArticleReactionByArticleIdAsync(request);
+        }
+
+        public async Task ReportArticleAsync(int articleId, string username)
+        {
+            var article = await _articleRepository.GetByIdAsync(articleId)
+                          ?? throw new ArgumentException("Article not found");
+
+            await _articleRepository.ReportArticleAsync(articleId, username);
+            int autoHideThresholdCount = Convert.ToInt32(_configuration["AutoHideThresholdCount"]);
+            var reportCount = await _articleRepository.GetReportCountAsync(articleId);
+            if (reportCount >= autoHideThresholdCount)
+            {
+                await _articleRepository.HideArticleAsync(article);
+            }
+        }
+
+        public async Task<List<NewsResponse>> GetReportedArticlesAsync()
+        {
+            var reported = await _articleRepository.GetReportedArticlesAsync();
+
+            return reported.Select(a => new NewsResponse
+            {
+                ArticleId = a.ArticleId,
+                Title = a.Title,
+                Content = a.Content,
+                Url = a.Url,
+                Source = a.Source,
+                Category = a.Category.CategoryName
+            }).ToList();
+        }
+
+        public async Task<bool> HideArticleAsync(int articleId)
+        {
+            var article = await _articleRepository.GetByIdAsync(articleId);
+            if (article == null) return false;
+
+            await _articleRepository.HideArticleAsync(article);
+            return true;
+        }
+
+        public async Task<bool> UnhideArticleAsync(int articleId)
+        {
+            var article = await _articleRepository.GetByIdAsync(articleId);
+            if (article == null) return false;
+
+            await _articleRepository.UnhideArticleAsync(article);
+            return true;
         }
     }
 }

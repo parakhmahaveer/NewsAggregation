@@ -16,5 +16,9 @@ namespace NewsAggrigation.DAL.Repositories.CategoryRepo
         Task<bool> DeleteCategoryAsync(int id);
         Task AddKeywordsAsync(int categoryId, IEnumerable<string> keywords);
         Task<bool> DeleteKeywordAsync(int keywordId);
+        Task<Category?> GetByIdAsync(int categoryId);
+        Task HideCategoryAsync(Category category);
+        Task UnhideCategoryAsync(Category category);
+        Task<int> BlockArticlesByKeywordAsync(string keyword);
     }
 }

@@ -83,5 +83,28 @@ namespace NewsAggrigation.BLL.Services.Catgory
             if (!result)
                 throw new NotFoundException($"Keyword with ID {keywordId} not found.");
         }
+
+        public async Task<bool> HideCategoryAsync(int categoryId)
+        {
+            var category = await _repository.GetByIdAsync(categoryId);
+            if (category == null) return false;
+
+            await _repository.HideCategoryAsync(category);
+            return true;
+        }
+
+        public async Task<bool> UnhideCategoryAsync(int categoryId)
+        {
+            var category = await _repository.GetByIdAsync(categoryId);
+            if (category == null) return false;
+
+            await _repository.UnhideCategoryAsync(category);
+            return true;
+        }
+
+        public async Task<int> BlockArticlesByKeywordAsync(string keyword)
+        {
+            return await _repository.BlockArticlesByKeywordAsync(keyword);
+        }
     }
 }

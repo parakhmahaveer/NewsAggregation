@@ -170,5 +170,39 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
             }
             return false;
         }
+
+        public Task<List<Article>> GetReportedArticlesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ReportArticleAsync(int articleId, string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> GetReportCountAsync(int articleId)
+        {
+            return await _context.ReportedArticles.CountAsync(r => r.ArticleId == articleId);
+        }
+
+        public async Task HideArticleAsync(Article article)
+        {
+            article.IsDeleted = true;
+            _context.Articles.Update(article);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UnhideArticleAsync(Article article)
+        {
+            article.IsDeleted = false;
+            _context.Articles.Update(article);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Article?> GetByIdAsync(int articleId)
+        {
+            return await _context.Articles.FirstOrDefaultAsync(a => a.ArticleId == articleId);
+        }
     }
 }

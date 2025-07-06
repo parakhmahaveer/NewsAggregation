@@ -125,5 +125,44 @@ namespace NewsAggrigation.Controller
             var articles = await _newsService.GetSavedArticlesAsync(username);
             return Ok(articles);
         }
+
+        [HttpPost("{articleId}/report")]
+        [Authorize]
+        public async Task<IActionResult> ReportArticle(int articleId, [FromBody] string username)
+        {
+            try
+            {
+                await _newsService.ReportArticleAsync(articleId, username);
+                return Ok(new { Message = "Article reported successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error reporting article", Details = ex.Message });
+            }
+        }
+
+        [HttpGet("reported")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetReportedArticles()
+        {
+            var articles = await _newsService.GetReportedArticlesAsync();
+            return Ok(articles);
+        }
+
+        [HttpPost("{articleId}/hide")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> HideArticle(int articleId)
+        {
+            var success = await _newsService.HideArticleAsync(articleId);
+            return success ? Ok(new { Message = "Article hidden." }) : NotFound();
+        }
+
+        [HttpPost("{articleId}/unhide")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnhideArticle(int articleId)
+        {
+            var success = await _newsService.UnhideArticleAsync(articleId);
+            return success ? Ok(new { Message = "Article unhidden." }) : NotFound();
+        }
     }
 }

@@ -15,6 +15,9 @@ namespace NewsAggrigation.BLL.Services.Catgory
         Task<CategoryResponse> GetCategoryWithKeywordsAsync(int categoryId);
         Task AddKeywordsAsync(int categoryId, CreateKeywordRequest request);
         Task DeleteCategoryAsync(int categoryId);
+        Task<bool> HideCategoryAsync(int categoryId);
+        Task<bool> UnhideCategoryAsync(int categoryId);
         Task DeleteKeywordAsync(int keywordId);
+        Task<int> BlockArticlesByKeywordAsync(string keyword);
     }
 }

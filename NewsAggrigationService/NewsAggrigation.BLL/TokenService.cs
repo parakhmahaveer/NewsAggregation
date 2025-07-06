@@ -15,7 +15,7 @@ namespace NewsAggrigation.BLL
             _configuration = configuration;
         }
 
-        public string CreateToken(string username, string role)
+        public string CreateToken(int userId, string username, string role)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
@@ -25,6 +25,7 @@ namespace NewsAggrigation.BLL
             {
             new Claim(JwtRegisteredClaimNames.Sub, username),
             new Claim(ClaimTypes.Role, role),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

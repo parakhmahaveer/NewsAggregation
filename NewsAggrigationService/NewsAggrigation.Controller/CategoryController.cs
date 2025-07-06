@@ -15,11 +15,11 @@ namespace NewsAggrigation.Controller
     [Authorize(Roles = "Admin")]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryService _service;
+        private readonly ICategoryService _categoryService;
 
-        public CategoryController(ICategoryService service)
+        public CategoryController(ICategoryService categoryService)
         {
-            _service = service;
+            _categoryService = categoryService;
         }
 
         [HttpGet]
@@ -27,7 +27,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                var result = await _service.GetAllCategoriesAsync();
+                var result = await _categoryService.GetAllCategoriesAsync();
                 return Ok(result);
             }
             catch (Exception ex)
@@ -41,7 +41,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                var result = await _service.CreateCategoryAsync(category);
+                var result = await _categoryService.CreateCategoryAsync(category);
                 return CreatedAtAction(nameof(GetCategory), new { id = result.CategoryId }, result);
             }
             catch (Exception ex)
@@ -55,7 +55,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                var result = await _service.GetCategoryWithKeywordsAsync(id);
+                var result = await _categoryService.GetCategoryWithKeywordsAsync(id);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -69,7 +69,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                await _service.AddKeywordsAsync(id, request);
+                await _categoryService.AddKeywordsAsync(id, request);
                 return Ok(new { Message = "Keywords added successfully." });
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                await _service.DeleteCategoryAsync(id);
+                await _categoryService.DeleteCategoryAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -97,13 +97,37 @@ namespace NewsAggrigation.Controller
         {
             try
             {
-                await _service.DeleteKeywordAsync(id);
+                await _categoryService.DeleteKeywordAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        [HttpPost("{categoryId}/hide")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> HideCategory(int categoryId)
+        {
+            var result = await _categoryService.HideCategoryAsync(categoryId);
+            return result ? Ok(new { Message = "Category hidden." }) : NotFound();
+        }
+
+        [HttpPost("{categoryId}/unhide")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnhideCategory(int categoryId)
+        {
+            var result = await _categoryService.UnhideCategoryAsync(categoryId);
+            return result ? Ok(new { Message = "Category unhidden." }) : NotFound();
+        }
+
+        [HttpPost("block")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BlockArticlesByKeyword([FromBody] string keyword)
+        {
+            var count = await _categoryService.BlockArticlesByKeywordAsync(keyword);
+            return Ok(new { Message = $"{count} articles blocked for keyword '{keyword}'." });
         }
     }
 }

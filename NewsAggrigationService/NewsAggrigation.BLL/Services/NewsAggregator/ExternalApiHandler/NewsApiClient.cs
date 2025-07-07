@@ -39,7 +39,7 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator.ExternalApiHandler
                     Content = item.GetProperty("content").GetString() ?? item.GetProperty("description").GetString(),
                     Url = item.GetProperty("url").GetString(),
                     Source = item.GetProperty("source").GetProperty("name").GetString(),
-                    PublishedDate = DateTime.UtcNow
+                    PublishedDate = DateTime.Now
                 });
             }
 

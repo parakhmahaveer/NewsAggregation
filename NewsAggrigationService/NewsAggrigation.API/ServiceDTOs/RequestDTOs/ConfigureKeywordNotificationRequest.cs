@@ -8,7 +8,7 @@ namespace NewsAggrigation.API.ServiceDTOs.RequestDTOs
 {
     public class ConfigureKeywordNotificationRequest
     {
-        public string Username { get; set; }
+        public int UserId { get; set; }
         public List<string> Keywords { get; set; }
         public bool IsEnabled { get; set; }
     }

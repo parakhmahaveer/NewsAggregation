@@ -17,12 +17,12 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
             _context = context;
         }
 
-        public async Task<List<Notification>> GetUserNotificationsAsync(string username)
+        public async Task<List<Notification>> GetUserNotificationsAsync(int userId)
         {
             return await _context.Notifications
                 .Include(n => n.Article)
                 .Include(n => n.User)
-                .Where(n => n.User.Username == username && !n.IsDeleted)
+                .Where(n => n.User.UserId == userId && !n.IsDeleted)
                 .ToListAsync();
         }
 

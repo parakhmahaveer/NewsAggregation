@@ -23,5 +23,6 @@ namespace NewsAggrigation.BLL.Services.News
         Task<List<NewsResponse>> GetReportedArticlesAsync();
         Task<bool> HideArticleAsync(int articleId);
         Task<bool> UnhideArticleAsync(int articleId);
+        Task<IEnumerable<NewsResponse>> GetPersonalizedArticlesAsync(int userId);
     }
 }

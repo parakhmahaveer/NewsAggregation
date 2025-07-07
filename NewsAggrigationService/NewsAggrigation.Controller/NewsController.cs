@@ -1,24 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.BLL.Services.Helper;
 using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.BLL.Services.News;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NewsAggrigation.Controller
 {
     [ApiController]
     [Route("api/news")]
     [Authorize]
-    public class NewsController: ControllerBase
+    public class NewsController : ControllerBase
     {
         private readonly INewsService _newsService;
         private readonly IUserIdentityContext _userIdentityContext;
-        public NewsController (INewsService newsService, IUserIdentityContext userIdentityContext)
+
+        public NewsController(INewsService newsService, IUserIdentityContext userIdentityContext)
         {
             _newsService = newsService;
             _userIdentityContext = userIdentityContext;
@@ -32,9 +29,13 @@ namespace NewsAggrigation.Controller
                 var articles = await _newsService.GetTodaysNewsAsync();
                 return Ok(articles);
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
             }
         }
 
@@ -46,23 +47,31 @@ namespace NewsAggrigation.Controller
                 var articles = await _newsService.GetNewsByDateRangeAsync(startDate, endDate);
                 return Ok(articles);
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
             }
         }
 
         [HttpPost("category")]
-        public async Task<IActionResult> GetTodaysNewsByCategory(NewsByCategoryRequest request)
+        public async Task<IActionResult> GetTodaysNewsByCategory([FromBody] NewsByCategoryRequest request)
         {
             try
             {
                 var articles = await _newsService.GetTodaysNewsByCategoryAsync(request);
                 return Ok(articles);
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
             }
         }
 
@@ -74,9 +83,13 @@ namespace NewsAggrigation.Controller
                 var articles = await _newsService.SearchNewsAsync(request);
                 return Ok(articles);
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
             }
         }
 
@@ -90,11 +103,15 @@ namespace NewsAggrigation.Controller
             }
             catch (ArgumentException ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return NotFound(new { ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                return BadRequest(new { ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
             }
         }
 
@@ -105,28 +122,46 @@ namespace NewsAggrigation.Controller
             {
                 var result = await _newsService.SetArticleReactionAsync(request);
                 if (!result)
-                    return BadRequest("Could not update feedback.");
-                return Ok(request.IsLiked ? "Article liked." : "Article disliked.");
+                    return BadRequest(new { Message = "Could not update feedback." });
+
+                return Ok(new { Message = request.IsLiked ? "Article liked." : "Article disliked." });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
             }
         }
 
         [HttpDelete("unsave")]
         public async Task<IActionResult> UnsaveArticle([FromQuery] string username, [FromQuery] int articleId)
         {
-            var result = await _newsService.UnsaveArticleAsync(username, articleId);
-            if (!result) return NotFound("Saved article not found.");
-            return NoContent();
+            try
+            {
+                var result = await _newsService.UnsaveArticleAsync(username, articleId);
+                return result ? NoContent() : NotFound(new { Message = "Saved article not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
+            }
         }
 
         [HttpGet("saved/{username}")]
         public async Task<IActionResult> GetSavedArticles(string username)
         {
-            var articles = await _newsService.GetSavedArticlesAsync(username);
-            return Ok(articles);
+            try
+            {
+                var articles = await _newsService.GetSavedArticlesAsync(username);
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Unexpected error occurred." + ex.Message });
+            }
         }
 
         [HttpPost("{articleId}/report")]
@@ -139,9 +174,13 @@ namespace NewsAggrigation.Controller
                 await _newsService.ReportArticleAsync(articleId, userId);
                 return Ok(new { Message = "Article reported successfully." });
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Error reporting article", Details = ex.Message });
+                return StatusCode(500, new { Message = "Error reporting article.", Details = ex.Message });
             }
         }
 
@@ -149,24 +188,61 @@ namespace NewsAggrigation.Controller
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetReportedArticles()
         {
-            var articles = await _newsService.GetReportedArticlesAsync();
-            return Ok(articles);
+            try
+            {
+                var articles = await _newsService.GetReportedArticlesAsync();
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to retrieve reported articles." + ex.Message });
+            }
         }
 
         [HttpPost("{articleId}/hide")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> HideArticle(int articleId)
         {
-            var success = await _newsService.HideArticleAsync(articleId);
-            return success ? Ok(new { Message = "Article hidden." }) : NotFound();
+            try
+            {
+                var success = await _newsService.HideArticleAsync(articleId);
+                return success ? Ok(new { Message = "Article hidden." }) : NotFound(new { Message = "Article not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to hide article." + ex.Message });
+            }
         }
 
         [HttpPost("{articleId}/unhide")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UnhideArticle(int articleId)
         {
-            var success = await _newsService.UnhideArticleAsync(articleId);
-            return success ? Ok(new { Message = "Article unhidden." }) : NotFound();
+            try
+            {
+                var success = await _newsService.UnhideArticleAsync(articleId);
+                return success ? Ok(new { Message = "Article unhidden." }) : NotFound(new { Message = "Article not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to unhide article." + ex.Message });
+            }
+        }
+
+        [HttpGet("personalized")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> GetPersonalizedArticles()
+        {
+            try
+            {
+                var userId = _userIdentityContext.UserId;
+                var articles = await _newsService.GetPersonalizedArticlesAsync(userId);
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to fetch personalized articles." + ex.Message });
+            }
         }
     }
 }

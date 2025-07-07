@@ -15,6 +15,11 @@ namespace NewsAggrigationClient.Services.Interfaces
         Task ViewSavedArticlesAsync();
         Task ReactToArticleAsync();
         Task SearchArticlesAsync();
+        Task ReportArticleAsync();
+        Task ViewNotificationsAsync();
+        Task ViewRecommendedArticlesAsync();
+        Task SetCategoryNotificationAsync(string category, bool enabled);
+        Task SetKeywordNotificationsAsync(List<string> keywords);
         Task ViewHeadlinesAsync(NewsByCategoryRequest request);
     }
 }

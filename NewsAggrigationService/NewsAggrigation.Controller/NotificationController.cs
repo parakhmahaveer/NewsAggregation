@@ -44,17 +44,21 @@ namespace NewsAggrigation.Controller
             }
         }
 
-        [HttpGet("{username}")]
-        public async Task<IActionResult> GetUserNotifications(string username)
+        [HttpGet()]
+        public async Task<IActionResult> GetUserNotifications()
         {
             try
             {
-                var result = await _notificationService.GetUserNotificationsAsync(username);
+                var result = await _notificationService.GetUserNotificationsAsync(_userIdentityContext.UserId);
                 return Ok(result);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Failed to fetch notifications.", Details = ex.Message });
+                return StatusCode(500, new { Message = "Unexpected error occurred: " + ex.Message });
             }
         }
 
@@ -67,9 +71,13 @@ namespace NewsAggrigation.Controller
                 await _notificationService.ConfigureCategoryNotificationAsync(request);
                 return Ok(new { Message = "Category notification settings updated." });
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Failed to configure category notifications.", Details = ex.Message });
+                return StatusCode(500, new { Message = "Unexpected error occurred: " + ex.Message });
             }
         }
 
@@ -78,12 +86,17 @@ namespace NewsAggrigation.Controller
         {
             try
             {
+                request.UserId = _userIdentityContext.UserId;
                 await _notificationService.ConfigureKeywordNotificationAsync(request);
                 return Ok(new { Message = "Keyword notification settings updated." });
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Failed to configure keyword notifications.", Details = ex.Message });
+                return StatusCode(500, new { Message = "Unexpected error occurred: " + ex.Message });
             }
         }
     }

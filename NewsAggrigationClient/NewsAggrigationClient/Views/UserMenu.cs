@@ -21,13 +21,15 @@ namespace NewsAggrigationClient.Views
         {
             while (true)
             {
+                Console.Clear();
                 Console.WriteLine($"\nWelcome to the News Application! Date: {DateTime.Now:dd-MMM-yyyy} Time: {DateTime.Now:hh:mm tt}");
                 Console.WriteLine("Please choose the options below:");
                 Console.WriteLine("1. Headlines");
                 Console.WriteLine("2. Saved Articles");
                 Console.WriteLine("3. Search");
                 Console.WriteLine("4. Notifications");
-                Console.WriteLine("5. Logout");
+                Console.WriteLine("5. Recommended Articles");
+                Console.WriteLine("6. Logout");
                 Console.Write("Choose an option: ");
 
                 var input = Console.ReadLine();
@@ -47,10 +49,14 @@ namespace NewsAggrigationClient.Views
                         break;
 
                     case "4":
-                        //await _userOperation.ConfigureNotificationsAsync();
+                        await ShowNotificationMenuAsync();
                         break;
 
                     case "5":
+                        await _userOperation.ViewRecommendedArticlesAsync();
+                        break;
+
+                    case "6":
                         Console.WriteLine("Logging out...");
                         return;
 
@@ -76,7 +82,7 @@ namespace NewsAggrigationClient.Views
                 {
                     case "1":
                         await _userOperation.ViewTodaysNewsAsync();
-                        bool flowControl = await ShowSaveArticleMenuAsync();
+                        bool flowControl = await ShowArticleActionMenuAsync();
                         if (!flowControl)
                         {
                             return;
@@ -152,7 +158,7 @@ namespace NewsAggrigationClient.Views
                         break;
                 }
                 await _userOperation.ViewHeadlinesAsync(request);
-                bool flowControl = await ShowSaveArticleMenuAsync();
+                bool flowControl = await ShowArticleActionMenuAsync();
                 if (!flowControl)
                 {
                     return;
@@ -160,7 +166,7 @@ namespace NewsAggrigationClient.Views
             }
         }
 
-        private async Task<bool> ShowSaveArticleMenuAsync()
+        private async Task<bool> ShowArticleActionMenuAsync()
         {
             Console.WriteLine("\nOptions:");
             Console.WriteLine("1. Save Article");
@@ -203,6 +209,77 @@ namespace NewsAggrigationClient.Views
                         return;
                     default:
                         Console.WriteLine("Invalid choice.");
+                        break;
+                }
+            }
+        }
+
+        private async Task ShowNotificationMenuAsync()
+        {
+            while (true)
+            {
+                Console.WriteLine("\nNotification:");
+                Console.WriteLine("1. View Notifications");
+                Console.WriteLine("2. Configure Notifications");
+                Console.WriteLine("3. Back");
+                Console.WriteLine("4. Logout");
+
+                var choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "1":
+                        await _userOperation.ViewNotificationsAsync();
+                        break;
+                    case "2":
+                        await ShowNotificationConfigMenuAsync();
+                        break;
+                    case "3":
+                        return;
+                    case "4":
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice.");
+                        break;
+                }
+            }
+        }
+
+        private async Task ShowNotificationConfigMenuAsync()
+        {
+            while (true)
+            {
+                Console.WriteLine("\n--- Configure Notifications ---");
+                Console.WriteLine("1. Enable/Disable Category Notification");
+                Console.WriteLine("2. Set Keywords for Notification");
+                Console.WriteLine("3. Back");
+                Console.Write("Choose an option: ");
+
+                var input = Console.ReadLine();
+                switch (input)
+                {
+                    case "1":
+                        Console.Write("Enter Category Name: ");
+                        var category = Console.ReadLine();
+                        Console.Write("Enable this category? (y/n): ");
+                        var enable = Console.ReadLine()?.Trim().ToLower() == "y";
+                        await _userOperation.SetCategoryNotificationAsync(category!, enable);
+                        break;
+
+                    case "2":
+                        Console.Write("Enter comma-separated keywords: ");
+                        var keywords = Console.ReadLine();
+                        var keywordList = keywords?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                   .Select(k => k.Trim())
+                                                   .ToList() ?? new List<string>();
+                        await _userOperation.SetKeywordNotificationsAsync(keywordList);
+                        break;
+
+                    case "3":
+                        return;
+
+                    default:
+                        Console.WriteLine("Invalid option.");
                         break;
                 }
             }

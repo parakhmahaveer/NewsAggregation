@@ -19,6 +19,7 @@ namespace NewsAggrigation.BLL.Services.Categorizer
 
             var categoryKeywords = await _context.CategoryKeywords
                 .AsNoTracking()
+                .Where(k => !k.IsDeleted)
                 .ToListAsync();
 
             if (!categoryKeywords.Any())

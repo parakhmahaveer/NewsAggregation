@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.BLL.Services.Catgory;
+using NewsAggrigation.BLL.Services.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,111 +24,153 @@ namespace NewsAggrigation.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCategories()
+        public async Task<IActionResult> GetAllCategoriesAsync()
         {
             try
             {
-                var result = await _categoryService.GetAllCategoriesAsync();
-                return Ok(result);
+                var categories = await _categoryService.GetAllCategoriesAsync();
+                return Ok(categories);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Failed to retrieve categories." + ex.Message });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromQuery] string category)
+        public async Task<IActionResult> CreateCategoryAsync([FromQuery] string category)
         {
             try
             {
-                var result = await _categoryService.CreateCategoryAsync(category);
-                return CreatedAtAction(nameof(GetCategory), new { id = result.CategoryId }, result);
+                var created = await _categoryService.CreateCategoryAsync(category);
+                return CreatedAtAction(nameof(GetCategoryByIdAsync), new { id = created.CategoryId }, created);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Failed to create category." + ex.Message });
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCategory(int id)
+        public async Task<IActionResult> GetCategoryByIdAsync(int id)
         {
             try
             {
-                var result = await _categoryService.GetCategoryWithKeywordsAsync(id);
-                return Ok(result);
+                var category = await _categoryService.GetCategoryWithKeywordsAsync(id);
+                return Ok(category);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Failed to fetch category." + ex.Message });
             }
         }
 
-        [HttpPost("{id}/keywords")]
-        public async Task<IActionResult> AddKeywords(int id, [FromBody] CreateKeywordRequest request)
+        [HttpPost("{categoryId}/keywords")]
+        public async Task<IActionResult> AddKeywordsToCategoryAsync(int categoryId, [FromBody] CreateKeywordRequest request)
         {
             try
             {
-                await _categoryService.AddKeywordsAsync(id, request);
+                await _categoryService.AddKeywordsAsync(categoryId, request);
                 return Ok(new { Message = "Keywords added successfully." });
             }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Failed to add keywords." + ex.Message });
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(int id)
+        [HttpDelete("{categoryId}")]
+        public async Task<IActionResult> DeleteCategoryAsync(int categoryId)
         {
             try
             {
-                await _categoryService.DeleteCategoryAsync(id);
+                await _categoryService.DeleteCategoryAsync(categoryId);
                 return NoContent();
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Failed to delete category." + ex.Message });
             }
         }
 
-        [HttpDelete("keywords/{id}")]
-        public async Task<IActionResult> DeleteKeyword(int id)
+        [HttpDelete("keywords/{keywordId}")]
+        public async Task<IActionResult> DeleteKeywordAsync(int keywordId)
         {
             try
             {
-                await _categoryService.DeleteKeywordAsync(id);
+                await _categoryService.DeleteKeywordAsync(keywordId);
                 return NoContent();
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Failed to delete keyword." + ex.Message });
             }
         }
 
         [HttpPost("{categoryId}/hide")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> HideCategory(int categoryId)
+        public async Task<IActionResult> HideCategoryAsync(int categoryId)
         {
-            var result = await _categoryService.HideCategoryAsync(categoryId);
-            return result ? Ok(new { Message = "Category hidden." }) : NotFound();
+            try
+            {
+                var success = await _categoryService.HideCategoryAsync(categoryId);
+                return success ? Ok(new { Message = "Category hidden." }) : NotFound(new { Message = "Category not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to hide category." + ex.Message });
+            }
         }
 
         [HttpPost("{categoryId}/unhide")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UnhideCategory(int categoryId)
+        public async Task<IActionResult> UnhideCategoryAsync(int categoryId)
         {
-            var result = await _categoryService.UnhideCategoryAsync(categoryId);
-            return result ? Ok(new { Message = "Category unhidden." }) : NotFound();
+            try
+            {
+                var success = await _categoryService.UnhideCategoryAsync(categoryId);
+                return success ? Ok(new { Message = "Category unhidden." }) : NotFound(new { Message = "Category not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to unhide category." + ex.Message });
+            }
         }
 
         [HttpPost("block")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> BlockArticlesByKeyword([FromBody] string keyword)
+        public async Task<IActionResult> BlockArticlesByKeywordAsync([FromBody] string keyword)
         {
-            var count = await _categoryService.BlockArticlesByKeywordAsync(keyword);
-            return Ok(new { Message = $"{count} articles blocked for keyword '{keyword}'." });
+            try
+            {
+                var count = await _categoryService.BlockArticlesByKeywordAsync(keyword);
+                return Ok(new { Message = $"{count} articles blocked for keyword '{keyword}'." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to block articles." + ex.Message });
+            }
         }
     }
 }

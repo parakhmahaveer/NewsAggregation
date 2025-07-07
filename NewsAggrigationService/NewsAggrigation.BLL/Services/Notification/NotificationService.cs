@@ -17,9 +17,9 @@ namespace NewsAggrigation.BLL.Services.Notification
             _userIdentityContext = userIdentityContext;
         }
 
-        public async Task<List<NotificationResponse>> GetUserNotificationsAsync(string username)
+        public async Task<List<NotificationResponse>> GetUserNotificationsAsync(int userId)
         {
-            var notifications = await _notificationRepo.GetUserNotificationsAsync(username);
+            var notifications = await _notificationRepo.GetUserNotificationsAsync(userId);
 
             return notifications.Select(n => new NotificationResponse
             {
@@ -60,16 +60,13 @@ namespace NewsAggrigation.BLL.Services.Notification
 
         public async Task ConfigureKeywordNotificationAsync(ConfigureKeywordNotificationRequest request)
         {
-            var user = await _notificationRepo.GetUserByUsernameAsync(request.Username)
-                       ?? throw new ArgumentException("User not found");
-
-            var existingKeywords = await _notificationRepo.GetUserKeywordsAsync(user.UserId);
+            var existingKeywords = await _notificationRepo.GetUserKeywordsAsync(request.UserId);
             await _notificationRepo.RemoveKeywordsAsync(existingKeywords);
 
             var newKeywords = request.Keywords.Distinct(StringComparer.OrdinalIgnoreCase)
                 .Select(k => new Keyword
                 {
-                    UserId = user.UserId,
+                    UserId = request.UserId,
                     Word = k,
                     IsEnabled = request.IsEnabled,
                     IsDeleted = false

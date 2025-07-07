@@ -16,7 +16,7 @@ namespace NewsAggrigationClient.Configuration
             {
                 _client = new HttpClient
                 {
-                    BaseAddress = new Uri("https://localhost:44313/api")
+                    BaseAddress = new Uri("http://localhost:7822/api")
                 };
             }
 

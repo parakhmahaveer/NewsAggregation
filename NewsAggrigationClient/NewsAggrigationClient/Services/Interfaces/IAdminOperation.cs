@@ -12,5 +12,10 @@ namespace NewsAggrigationClient.Services.Interfaces
         Task ViewExternalServerDetailsAsync();
         Task AddCategoryAsync();
         Task UpdateExternalServerAsync();
+        Task ViewReportedArticlesAsync();
+        Task ToggleArticleVisibilityAsync();
+        Task ToggleCategoryVisibilityAsync();
+        Task ToggleKeywordVisibilityAsync();
+        Task BlockArticlesByKeywordAsync();
     }
 }

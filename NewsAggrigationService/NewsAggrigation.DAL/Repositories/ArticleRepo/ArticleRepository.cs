@@ -115,7 +115,7 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
             {
                 UserId = userId,
                 ArticleId = articleId,
-                SavedDate = DateTime.UtcNow,
+                SavedDate = DateTime.Now,
                 IsDeleted = false
             };
 
@@ -217,6 +217,64 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         public async Task<Article?> GetByIdAsync(int articleId)
         {
             return await _context.Articles.FirstOrDefaultAsync(a => a.ArticleId == articleId);
+        }
+
+        public async Task<IEnumerable<Article>> GetRecommendedArticlesForTodayAsync(int userId)
+        {
+            var today = DateTime.Now.Date;
+
+            // Get liked articles
+            var likedArticleIds = await _context.UserArticleActivity
+                .Where(x => x.UserId == userId && x.IsLiked)
+                .Select(x => x.ArticleId)
+                .ToListAsync();
+
+            // Get saved articles
+            var savedArticleIds = await _context.SavedArticles
+                .Where(x => x.UserId == userId && !x.IsDeleted)
+                .Select(x => x.ArticleId)
+                .ToListAsync();
+
+            // Get enabled category IDs
+            var enabledCategoryIds = await _context.CategoryNotificationSettings
+                .Where(x => x.UserId == userId && x.IsEnabled && !x.IsDeleted)
+                .Select(x => x.CategoryId)
+                .ToListAsync();
+
+            // Get enabled keywords
+            var enabledKeywordList = await _context.KeywordNotificationSettings
+                .Where(k => !k.IsDeleted && k.IsEnabled && k.Keyword.UserId == userId)
+                .Select(k => k.Keyword.Word)
+                .ToListAsync();
+
+            // Build filtered article queries
+            var articlesFromLikesOrSaves = _context.Articles
+                .Where(a =>
+                    (likedArticleIds.Contains(a.ArticleId) || savedArticleIds.Contains(a.ArticleId)) &&
+                    a.PublishedDate.Date == today &&
+                    !a.IsDeleted);
+
+            var articlesFromCategories = _context.Articles
+                .Where(a =>
+                    enabledCategoryIds.Contains(a.CategoryId) &&
+                    a.PublishedDate.Date == today &&
+                    !a.IsDeleted);
+
+            var articlesFromKeywords = _context.Articles
+                .Where(a =>
+                    a.PublishedDate.Date == today &&
+                    !a.IsDeleted &&
+                    enabledKeywordList.Any(k => a.Title.Contains(k) || a.Content.Contains(k)));
+
+            // Combine all and return distinct results
+            var recommendedArticles = await articlesFromLikesOrSaves
+                .Union(articlesFromCategories)
+                .Union(articlesFromKeywords)
+                .Distinct()
+                .OrderByDescending(a => a.PublishedDate)
+                .ToListAsync();
+
+            return recommendedArticles;
         }
     }
 }

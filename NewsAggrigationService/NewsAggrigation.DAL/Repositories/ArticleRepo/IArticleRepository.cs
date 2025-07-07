@@ -25,5 +25,6 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         Task HideArticleAsync(Article article);
         Task UnhideArticleAsync(Article article);
         Task<Article?> GetByIdAsync(int articleId);
+        Task<IEnumerable<Article>> GetRecommendedArticlesForTodayAsync(int userId);
     }
 }

@@ -84,19 +84,22 @@ namespace NewsAggrigation.DAL.Repositories.CategoryRepo
 
         public async Task<Category?> GetByIdAsync(int categoryId)
         {
-            return await _context.Categories.FindAsync(categoryId);
+            return await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.CategoryId == categoryId);
         }
 
         public async Task HideCategoryAsync(Category category)
         {
             category.IsDeleted = true;
+            await HideCategoryKeywordsAsync(category.CategoryId);
 
             var relatedArticles = await _context.Articles
                 .Where(a => a.CategoryId == category.CategoryId)
                 .ToListAsync();
 
             foreach (var article in relatedArticles)
+            {
                 article.IsDeleted = true;
+            }
 
             await _context.SaveChangesAsync();
         }
@@ -104,8 +107,10 @@ namespace NewsAggrigation.DAL.Repositories.CategoryRepo
         public async Task UnhideCategoryAsync(Category category)
         {
             category.IsDeleted = false;
+            await UnhideCategoryKeywordsAsync(category.CategoryId);
 
             var relatedArticles = await _context.Articles
+                .IgnoreQueryFilters()
                 .Where(a => a.CategoryId == category.CategoryId)
                 .ToListAsync();
 
@@ -127,6 +132,33 @@ namespace NewsAggrigation.DAL.Repositories.CategoryRepo
             await _context.SaveChangesAsync();
 
             return articlesToBlock.Count;
+        }
+
+        private async Task HideCategoryKeywordsAsync(int categoryId)
+        {
+            var categoryKeywords = await _context.CategoryKeywords
+                .Where(ck => ck.CategoryId == categoryId && !ck.IsDeleted)
+                .ToListAsync();
+
+            foreach (var ck in categoryKeywords)
+                ck.IsDeleted = true;
+
+            _context.CategoryKeywords.UpdateRange(categoryKeywords);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UnhideCategoryKeywordsAsync(int categoryId)
+        {
+            var categoryKeywords = await _context.CategoryKeywords
+                .IgnoreQueryFilters()
+                .Where(ck => ck.CategoryId == categoryId && ck.IsDeleted)
+                .ToListAsync();
+
+            foreach (var ck in categoryKeywords)
+                ck.IsDeleted = false;
+
+            _context.CategoryKeywords.UpdateRange(categoryKeywords);
+            await _context.SaveChangesAsync();
         }
     }
 }

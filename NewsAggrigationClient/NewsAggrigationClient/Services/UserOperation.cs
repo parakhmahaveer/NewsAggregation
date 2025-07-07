@@ -3,6 +3,7 @@ using NewsAggrigationClient.Models.DTOs.ResponseDTOs;
 using NewsAggrigationClient.Services.Interfaces;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace NewsAggrigationClient.Services
 {
@@ -301,6 +302,111 @@ namespace NewsAggrigationClient.Services
                 Console.WriteLine($"URL        : {article.Url}");
                 Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
                 Console.WriteLine($"Category   : {article.Category}");
+            }
+        }
+
+        public async Task ViewNotificationsAsync()
+        {
+            var response = await _httpClient.GetAsync("api/notifications");
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Error: {content}");
+                return;
+            }
+
+            var notifications = JsonSerializer.Deserialize<List<NotificationResponse>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (notifications == null || notifications.Count == 0)
+            {
+                Console.WriteLine("No notifications found.");
+                return;
+            }
+
+            Console.WriteLine("\nYour Notifications:");
+            int index = 1;
+            foreach (var note in notifications)
+            {
+                Console.WriteLine($"\n{index++}. {note.Title}");
+                Console.WriteLine($"   📅 Date   : {note.SentDate:dd MMM yyyy hh:mm tt}");
+                Console.WriteLine($"   🌐 Source : {note.Source}");
+                Console.WriteLine($"   🔗 URL    : {note.Url}");
+            }
+        }
+
+        public async Task SetCategoryNotificationAsync(string category, bool enabled)
+        {
+            var payload = new
+            {
+                Category = category,
+                Enabled = enabled
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("api/notifications/config/category", payload);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Category '{category}' notification {(enabled ? "enabled" : "disabled")}.");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Failed to update category notification: {error}");
+            }
+        }
+
+        public async Task SetKeywordNotificationsAsync(List<string> keywords)
+        {
+            var payload = new
+            {
+                Keywords = keywords
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("api/notifications/config/keywords", payload);
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Keyword notifications updated.");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Failed to update keyword notifications: {error}");
+            }
+        }
+
+        public async Task ReportArticleAsync()
+        {
+            Console.Write("Enter Article ID to report: ");
+            if (!int.TryParse(Console.ReadLine(), out int articleId))
+            {
+                Console.WriteLine("Invalid Article ID.");
+                return;
+            }
+
+            var payload = new { }; // server uses token to resolve user
+            var response = await _httpClient.PostAsJsonAsync($"api/news/{articleId}/report", payload);
+
+            Console.WriteLine(response.IsSuccessStatusCode
+                ? "Article reported."
+                : "" + await response.Content.ReadAsStringAsync());
+        }
+
+        public async Task ViewRecommendedArticlesAsync()
+        {
+            var response = await _httpClient.GetAsync("api/news/personalized");
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Unable to fetch personalized articles.");
+                return;
+            }
+
+            var articles = await response.Content.ReadFromJsonAsync<List<NewsResponse>>();
+            foreach (var article in articles)
+            {
+                Console.WriteLine($"[{article.Category}] {article.Title} - {article.Source}");
             }
         }
     }

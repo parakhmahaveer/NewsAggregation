@@ -6,7 +6,7 @@ namespace NewsAggrigation.BLL.Services.Notification
     public interface INotificationService
     {
         Task<NotificationConfigResponse> GetUserNotificationConfigAsync(int userId);
-        Task<List<NotificationResponse>> GetUserNotificationsAsync(string username);
+        Task<List<NotificationResponse>> GetUserNotificationsAsync(int userId);
         Task ConfigureCategoryNotificationAsync(ConfigureCategoryNotificationRequest request);
         Task ConfigureKeywordNotificationAsync(ConfigureKeywordNotificationRequest request);
     }

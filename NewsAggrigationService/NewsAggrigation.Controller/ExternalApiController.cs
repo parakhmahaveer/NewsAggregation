@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.BLL.Services.ExternalApi;
+using NewsAggrigation.BLL.Services.Helper;
 
 namespace NewsAggrigation.Controller
 {
@@ -10,80 +11,100 @@ namespace NewsAggrigation.Controller
     [Authorize(Roles = "Admin")]
     public class ExternalApisController : ControllerBase
     {
-        private readonly IExternalApiService _service;
+        private readonly IExternalApiService _externalApiService;
 
         public ExternalApisController(IExternalApiService service)
         {
-            _service = service;
+            _externalApiService = service;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllExternalApisAsync()
         {
             try
             {
-                var result = await _service.GetAllAsync();
-                return Ok(result);
+                var apis = await _externalApiService.GetAllAsync();
+                return Ok(apis);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "An unexpected error occurred while retrieving APIs." + ex.Message });
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{apiId}")]
+        public async Task<IActionResult> GetExternalApiByIdAsync(int apiId)
         {
             try
             {
-                var result = await _service.GetByIdAsync(id);
-                return result != null ? Ok(result) : NotFound();
+                var api = await _externalApiService.GetByIdAsync(apiId);
+                return api != null ? Ok(api) : NotFound(new { Message = "External API not found." });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "An unexpected error occurred while retrieving the API." + ex.Message });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ExternalApiRequest dto)
+        public async Task<IActionResult> AddExternalApiAsync([FromBody] ExternalApiRequest request)
         {
             try
             {
-                var result = await _service.AddAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+                var createdApi = await _externalApiService.AddAsync(request);
+                return CreatedAtAction(nameof(GetExternalApiByIdAsync), new { apiId = createdApi.Id }, createdApi);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "An error occurred while adding the external API." + ex.Message });
             }
         }
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ExternalApiUpdateRequest dto)
+        [HttpPatch("{apiId}")]
+        public async Task<IActionResult> UpdateExternalApiAsync(int apiId, [FromBody] ExternalApiUpdateRequest request)
         {
             try
             {
-                var result = await _service.UpdateAsync(id, dto);
-                return result != null ? Ok(result) : NotFound();
+                var updatedApi = await _externalApiService.UpdateAsync(apiId, request);
+                return updatedApi != null ? Ok(updatedApi) : NotFound(new { Message = "External API not found." });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "An error occurred while updating the external API." + ex.Message });
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{apiId}")]
+        public async Task<IActionResult> DeleteExternalApiAsync(int apiId)
         {
             try
             {
-                var success = await _service.DeleteAsync(id);
-                return success ? NoContent() : NotFound();
+                var isDeleted = await _externalApiService.DeleteAsync(apiId);
+                return isDeleted ? NoContent() : NotFound(new { Message = "External API not found." });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "An error occurred while deleting the external API." + ex.Message });
             }
         }
     }

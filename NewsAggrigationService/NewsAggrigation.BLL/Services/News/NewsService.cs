@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
@@ -26,8 +27,8 @@ namespace NewsAggrigation.BLL.Services.News
         {
             try
             {
-                var todayStartTime = DateTime.UtcNow.Date;
-                var todayEndTime = DateTime.UtcNow.Date.Add(TimeSpan.FromDays(1));
+                var todayStartTime = DateTime.Now.Date;
+                var todayEndTime = DateTime.Now.Date.Add(TimeSpan.FromDays(1));
                 return await _articleRepository.GetArticlesByDateRangeAsync(todayStartTime, todayEndTime);
             }
             catch (Exception ex)
@@ -137,6 +138,19 @@ namespace NewsAggrigation.BLL.Services.News
 
             await _articleRepository.UnhideArticleAsync(article);
             return true;
+        }
+
+        public async Task<IEnumerable<NewsResponse>> GetPersonalizedArticlesAsync(int userId)
+        {
+            var articles = await _articleRepository.GetRecommendedArticlesForTodayAsync(userId);
+
+            return articles.Select(a => new NewsResponse
+            {
+                Title = a.Title,
+                Url = a.Url,
+                Source = a.Source,
+                Category = a.Category.CategoryName
+            });
         }
     }
 }

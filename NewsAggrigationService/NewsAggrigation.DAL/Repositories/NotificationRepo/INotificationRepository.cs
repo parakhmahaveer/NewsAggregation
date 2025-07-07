@@ -4,7 +4,7 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
 {
     public interface INotificationRepository
     {
-        Task<List<Notification>> GetUserNotificationsAsync(string username);
+        Task<List<Notification>> GetUserNotificationsAsync(int userId);
         Task<User?> GetUserByUsernameAsync(string username);
         Task<Category?> GetCategoryByNameAsync(string categoryName);
         Task<CategoryNotificationSetting?> GetCategorySettingAsync(int userId, int categoryId);

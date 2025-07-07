@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.BLL.Services.Auth;
+using NewsAggrigation.BLL.Services.Helper;
 
 namespace NewsAggrigation.Controller
 {
@@ -15,32 +16,42 @@ namespace NewsAggrigation.Controller
             _authService = authService;
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterUserRequest dto)
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserRequest request)
         {
             try
             {
-                var result = await _authService.RegisterAsync(dto);
+                var result = await _authService.RegisterAsync(request);
                 return Ok(result);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Registration failed." + ex.Message });
             }
         }
 
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginRequest dto)
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
             try
             {
-                var result = await _authService.LoginAsync(dto);
-                if (result == null) return Unauthorized();
+                var result = await _authService.LoginAsync(request);
+                if (result == null)
+                    return StatusCode(401, new { Message = "Invalid email or password." });
+
                 return Ok(result);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = "Login failed." + ex.Message });
             }
         }
     }

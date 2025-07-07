@@ -40,7 +40,7 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator
                         if (!_context.Articles.Any(a => a.Url == article.Url))
                         {
                             var detectedCategoryId = await _categorizerService.DetectCategoryAsync($"{article.Title} {article.Content}");
-                            article.CategoryId = (int)(detectedCategoryId == null ? 9 : detectedCategoryId);
+                            article.CategoryId = (int)(detectedCategoryId == null ? 11 : detectedCategoryId);
                             _context.Articles.Add(article);
                             await _context.SaveChangesAsync();
 
@@ -48,7 +48,7 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator
                         }
                     }
 
-                    externalApi.LastAccessedDate = DateTime.UtcNow;
+                    externalApi.LastAccessedDate = DateTime.Now;
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("News fetched from {source}", externalApi.Name);
                 }
@@ -93,7 +93,7 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator
                 {
                     UserId = userId,
                     ArticleId = article.ArticleId,
-                    SentDate = DateTime.UtcNow,
+                    SentDate = DateTime.Now,
                     IsDeleted = false
                 });
             }

@@ -118,6 +118,29 @@ namespace NewsAggrigationClient.Services
             }
         }
 
+        public async Task<List<GetCategoriesResponse>> GetAllCategoriesAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("api/categories");
+                if (response.IsSuccessStatusCode)
+                {
+                    var categories = await response.Content.ReadFromJsonAsync<List<GetCategoriesResponse>>();
+                    return categories ?? new List<GetCategoriesResponse>();
+                }
+                else
+                {
+                    Console.WriteLine("Failed to load categories.");
+                    return new List<GetCategoriesResponse>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while fetching categories: {ex.Message}");
+                return new List<GetCategoriesResponse>();
+            }
+        }
+
         public async Task ViewSavedArticlesAsync()
         {
             try
@@ -225,7 +248,6 @@ namespace NewsAggrigationClient.Services
 
             var request = new ArticleReactionRequest
             {
-                Username = _username,
                 IsLiked = isLiked,
                 ArticleId = articleId
             };

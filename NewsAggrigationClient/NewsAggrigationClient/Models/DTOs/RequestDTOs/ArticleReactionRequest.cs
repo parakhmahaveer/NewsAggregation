@@ -8,8 +8,8 @@ namespace NewsAggrigationClient.Models.DTOs.RequestDTOs
 {
     public class ArticleReactionRequest
     {
+        public int UserId { get; set; } = 0;
         public int ArticleId { get; set; }
-        public string Username { get; set; }
         public bool IsLiked { get; set; }
     }
 }

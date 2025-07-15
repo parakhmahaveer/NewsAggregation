@@ -18,13 +18,36 @@ namespace NewsAggrigationClient.Services
         {
             _httpClient = httpClient;
         }
+
+        private static string ReadPassword()
+        {
+            var pwd = new StringBuilder();
+            while (true)
+            {
+                var key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter) break;
+                if (key.Key == ConsoleKey.Backspace && pwd.Length > 0)
+                {
+                    pwd.Length--;
+                    Console.Write("\b \b");
+                }
+                else if (!char.IsControl(key.KeyChar))
+                {
+                    pwd.Append(key.KeyChar);
+                    Console.Write("*");
+                }
+            }
+            Console.WriteLine();
+            return pwd.ToString();
+        }
+
         public async Task<TokenResponse?> LoginAsync()
         {
             Console.WriteLine("Enter Username:");
             var username = Console.ReadLine()?.Trim();
 
             Console.WriteLine("Enter Password:");
-            var password = Console.ReadLine()?.Trim();
+            var password = ReadPassword();
 
             var user = new UserLogin
             {

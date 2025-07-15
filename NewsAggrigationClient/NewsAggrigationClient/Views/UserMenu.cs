@@ -46,6 +46,7 @@ namespace NewsAggrigationClient.Views
 
                     case "3":
                         await _userOperation.SearchArticlesAsync();
+                        Console.ReadLine();
                         break;
 
                     case "4":
@@ -122,47 +123,55 @@ namespace NewsAggrigationClient.Views
                 StartDate = startDate,
                 EndDate = endDate
             };
+
+            var categories = await _userOperation.GetAllCategoriesAsync();
+
             while (true)
             {
                 Console.WriteLine("\nChoose category:");
                 Console.WriteLine("1. All");
-                Console.WriteLine("2. Business");
-                Console.WriteLine("3. Entertainment");
-                Console.WriteLine("4. Sports");
-                Console.WriteLine("5. Technology");
-                Console.WriteLine("6. Back");
+
+                var categoryMap = new Dictionary<int, string>
+                {
+                    { 1, "all" }
+                };
+
+                int option = 2;
+                foreach (var category in categories)
+                {
+                    Console.WriteLine($"{option}. {category.CategoryName}");
+                    categoryMap[option] = category.CategoryName;
+                    option++;
+                }
+
+                Console.WriteLine($"{option}. Back");
+                int backOption = option;
 
                 Console.Write("Enter your choice: ");
                 var input = Console.ReadLine();
 
-                switch (input)
+                if (int.TryParse(input, out int selectedOption))
                 {
-                    case "1":
-                        request.Category = "all";
-                        break;
-                    case "2":
-                        request.Category = "business";
-                        break;
-                    case "3":
-                        request.Category = "entertainment";
-                        break;
-                    case "4":
-                        request.Category = "sports";
-                        break;
-                    case "5":
-                        request.Category = "technology";
-                        break;
-                    case "6":
+                    if (selectedOption == backOption)
                         return;
-                    default:
-                        Console.WriteLine("Invalid choice.");
-                        break;
+
+                    if (categoryMap.TryGetValue(selectedOption, out var selectedCategory))
+                    {
+                        request.Category = selectedCategory;
+                        await _userOperation.ViewHeadlinesAsync(request);
+
+                        bool flowControl = await ShowArticleActionMenuAsync();
+                        if (!flowControl)
+                            return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid choice. Try again.");
+                    }
                 }
-                await _userOperation.ViewHeadlinesAsync(request);
-                bool flowControl = await ShowArticleActionMenuAsync();
-                if (!flowControl)
+                else
                 {
-                    return;
+                    Console.WriteLine("Please enter a valid number.");
                 }
             }
         }

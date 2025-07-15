@@ -152,17 +152,43 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
 
         public async Task<bool> SetArticleReactionByArticleIdAsync(ArticleReactionRequest request)
         {
-            var userId = (await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username)).UserId;
             var article = await _context.Articles.FirstOrDefaultAsync(a => a.ArticleId == request.ArticleId);
             if (article != null)
             {
-                if (request.IsLiked)
+                var userActivity = await _context.UserArticleActivity.FirstOrDefaultAsync(ua => ua.UserId == request.UserId && ua.ArticleId == request.ArticleId);
+                if (userActivity != null)
                 {
-                    article.LikeCount++;
+                    if (request.IsLiked)
+                    {
+                        userActivity.IsLiked = true;
+                        userActivity.IsDisliked = false;
+                        article.LikeCount++;
+                    }
+                    else
+                    {
+                        userActivity.IsDisliked = true;
+                        userActivity.IsLiked = false;
+                        article.DisLikeCount++;
+                    }
                 }
                 else
                 {
-                    article.DisLikeCount++;
+                    var newActivity = new UserArticleActivity
+                    {
+                        ArticleId = request.ArticleId,
+                        UserId = request.UserId
+                    };
+                    if (request.IsLiked)
+                    {
+                        newActivity.IsLiked = true;
+                        article.LikeCount++;
+                    }
+                    else
+                    {
+                        newActivity.IsDisliked = true;
+                        article.DisLikeCount++;
+                    }
+                    await _context.UserArticleActivity.AddAsync(newActivity);
                 }
                 await _context.SaveChangesAsync();
                 return true;
@@ -189,7 +215,6 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         public async Task ReportArticleAsync(int articleId, int userId)
         {
             var reportedArticle = await _context.ReportedArticles.FirstOrDefaultAsync(r => r.ArticleId == articleId);
-
             if (reportedArticle != null)
             {
                 reportedArticle.ReportCount++;

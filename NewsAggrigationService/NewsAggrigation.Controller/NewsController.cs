@@ -120,6 +120,7 @@ namespace NewsAggrigation.Controller
         {
             try
             {
+                request.UserId = _userIdentityContext.UserId;
                 var result = await _newsService.SetArticleReactionAsync(request);
                 if (!result)
                     return BadRequest(new { Message = "Could not update feedback." });

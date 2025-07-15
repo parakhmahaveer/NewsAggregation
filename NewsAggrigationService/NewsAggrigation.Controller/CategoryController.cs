@@ -13,7 +13,7 @@ namespace NewsAggrigation.Controller
 {
     [ApiController]
     [Route("api/categories")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
@@ -24,6 +24,7 @@ namespace NewsAggrigation.Controller
         }
 
         [HttpGet]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetAllCategoriesAsync()
         {
             try

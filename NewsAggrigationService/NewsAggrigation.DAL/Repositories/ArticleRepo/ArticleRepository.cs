@@ -170,19 +170,39 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
             return false;
         }
 
-        public Task<List<Article>> GetReportedArticlesAsync()
+        public async Task<List<Article>> GetReportedArticlesAsync()
         {
-            throw new NotImplementedException();
+            var reportedArticleIds = await _context.ReportedArticles.
+                Select(ra => ra.ArticleId).Distinct().ToListAsync();
+
+            var articles = await _context.Articles
+                .Where(a => reportedArticleIds.Contains(a.ArticleId)).Include(a => a.Category).ToListAsync();
+
+            return articles;
+        }
+
+        public async Task<bool> HasUserReportedAsync(int articleId, int userId)
+        {
+            return await _context.UserArticleActivity.AnyAsync(a => a.ArticleId == articleId && a.UserId == userId && a.IsFlagged);
         }
 
         public async Task ReportArticleAsync(int articleId, int userId)
         {
-            var reportedArticle = new ReportedArticle
+            var reportedArticle = await _context.ReportedArticles.FirstOrDefaultAsync(r => r.ArticleId == articleId);
+
+            if (reportedArticle != null)
             {
-                ArticleId = articleId,
-            };
-            reportedArticle.ReportCount++;
-            _context.ReportedArticles.Add(reportedArticle);
+                reportedArticle.ReportCount++;
+            }
+            else
+            {
+                reportedArticle = new ReportedArticle
+                {
+                    ArticleId = articleId,
+                    ReportCount = 1
+                };
+                await _context.ReportedArticles.AddAsync(reportedArticle);
+            }
 
             var userArticleActivity = new UserArticleActivity
             {
@@ -242,9 +262,9 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
                 .ToListAsync();
 
             // Get enabled keywords
-            var enabledKeywordList = await _context.KeywordNotificationSettings
-                .Where(k => !k.IsDeleted && k.IsEnabled && k.Keyword.UserId == userId)
-                .Select(k => k.Keyword.Word)
+            var enabledKeywordList = await _context.Keywords
+                .Where(k => !k.IsDeleted && k.IsEnabled && k.UserId == userId)
+                .Select(k => k.Word)
                 .ToListAsync();
 
             // Build filtered article queries

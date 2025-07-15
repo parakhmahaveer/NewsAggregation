@@ -332,9 +332,9 @@ namespace NewsAggrigationClient.Services
             foreach (var note in notifications)
             {
                 Console.WriteLine($"\n{index++}. {note.Title}");
-                Console.WriteLine($"   📅 Date   : {note.SentDate:dd MMM yyyy hh:mm tt}");
-                Console.WriteLine($"   🌐 Source : {note.Source}");
-                Console.WriteLine($"   🔗 URL    : {note.Url}");
+                Console.WriteLine($"    Date   : {note.SentDate:dd MMM yyyy hh:mm tt}");
+                Console.WriteLine($"    Source : {note.Source}");
+                Console.WriteLine($"    URL    : {note.Url}");
             }
         }
 
@@ -342,11 +342,13 @@ namespace NewsAggrigationClient.Services
         {
             var payload = new
             {
-                Category = category,
-                Enabled = enabled
+                CategorySettings = new Dictionary<string, bool>
+                {
+                    { category, enabled }
+                }
             };
 
-            var response = await _httpClient.PostAsJsonAsync("api/notifications/config/category", payload);
+            var response = await _httpClient.PostAsJsonAsync("api/notifications/configure/category", payload);
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"Category '{category}' notification {(enabled ? "enabled" : "disabled")}.");
@@ -365,7 +367,7 @@ namespace NewsAggrigationClient.Services
                 Keywords = keywords
             };
 
-            var response = await _httpClient.PostAsJsonAsync("api/notifications/config/keywords", payload);
+            var response = await _httpClient.PostAsJsonAsync("api/notifications/configure/keyword", payload);
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine("Keyword notifications updated.");
@@ -406,7 +408,10 @@ namespace NewsAggrigationClient.Services
             var articles = await response.Content.ReadFromJsonAsync<List<NewsResponse>>();
             foreach (var article in articles)
             {
-                Console.WriteLine($"[{article.Category}] {article.Title} - {article.Source}");
+                Console.WriteLine($"\nID         : {article.ArticleId}");
+                Console.WriteLine($"Title      : {article.Title}");
+                Console.WriteLine($"Source     : {article.Source}");
+                Console.WriteLine($"URL        : {article.Url}");
             }
         }
     }

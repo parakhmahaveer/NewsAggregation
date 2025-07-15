@@ -68,25 +68,25 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator
 
             var lowerContent = $"{article.Title} {article.Content}".ToLower();
 
-            // 📌 1. Users subscribed to category
+            //Users subscribed to category
             var categoryUserIds = await _context.CategoryNotificationSettings
                 .Where(c => c.CategoryId == article.CategoryId && c.IsEnabled && !c.IsDeleted)
                 .Select(c => c.UserId)
                 .ToListAsync();
 
-            // 📌 2. Users subscribed to keywords found in article
+            //Users subscribed to keywords found in article
             var keywordUserIds = await _context.Keywords
                 .Where(k => k.IsEnabled && !k.IsDeleted && lowerContent.Contains(k.Word.ToLower()))
                 .Select(k => k.UserId)
                 .ToListAsync();
 
-            // 📌 3. Combine & deduplicate
+            //Combine & deduplicate
             var allUserIds = categoryUserIds
                 .Concat(keywordUserIds)
                 .Distinct()
                 .ToList();
 
-            // 📌 4. Create notification records
+            //Create notification records
             foreach (var userId in allUserIds)
             {
                 _context.Notifications.Add(new DAL.Models.Notification

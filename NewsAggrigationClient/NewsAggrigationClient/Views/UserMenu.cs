@@ -54,6 +54,7 @@ namespace NewsAggrigationClient.Views
 
                     case "5":
                         await _userOperation.ViewRecommendedArticlesAsync();
+                        Console.ReadLine();
                         break;
 
                     case "6":
@@ -168,25 +169,37 @@ namespace NewsAggrigationClient.Views
 
         private async Task<bool> ShowArticleActionMenuAsync()
         {
-            Console.WriteLine("\nOptions:");
-            Console.WriteLine("1. Save Article");
-            Console.WriteLine("2. Like or Dislike");
-            Console.WriteLine("3. Back");
+            while (true)
+            {
+                Console.WriteLine("\nOptions:");
+                Console.WriteLine("1. Save Article");
+                Console.WriteLine("2. Like or Dislike");
+                Console.WriteLine("3. Report Article");
+                Console.WriteLine("4. Back");
 
-            var option = Console.ReadLine();
-            if (option == "1")
-            {
-                await _userOperation.SaveArticleAsync();
-            }
-            else if (option == "2")
-            {
-                await _userOperation.ReactToArticleAsync();
-            }
-            else if(option == "3")
-            {
-                return false;
-            }
+                Console.Write("Select an option: ");
+                var option = Console.ReadLine()?.Trim();
+
+                switch (option)
+                {
+                    case "1":
+                        await _userOperation.SaveArticleAsync();
+                        break;
+                    case "2":
+                        await _userOperation.ReactToArticleAsync();
+                        break;
+                    case "3":
+                        await _userOperation.ReportArticleAsync();
+                        break;
+                    case "4":
+                        return false; // Exit the menu
+                    default:
+                        Console.WriteLine("Invalid option. Please try again.");
+                        continue;
+                }
+
                 return true;
+            }
         }
 
         private async Task ShowSavedArticlesMenuAsync()

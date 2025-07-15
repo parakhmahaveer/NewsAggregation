@@ -41,9 +41,8 @@ namespace NewsAggrigationClient.Views
             Console.WriteLine("5. View Reported Articles");
             Console.WriteLine("6. Hide/Unhide Articles");
             Console.WriteLine("7. Hide/Unhide Categories");
-            Console.WriteLine("8. Hide/Unhide Keywords");
-            Console.WriteLine("9. Block Articles by Keyword");
-            Console.WriteLine("10. Logout");
+            Console.WriteLine("8. Block Articles by Keyword");
+            Console.WriteLine("9. Logout");
         }
 
         private async Task<bool> ExecuteMenuOptionAsync(string? input)
@@ -72,12 +71,9 @@ namespace NewsAggrigationClient.Views
                     await _adminOperation.ToggleCategoryVisibilityAsync();
                     break;
                 case "8":
-                    await _adminOperation.ToggleKeywordVisibilityAsync();
-                    break;
-                case "9":
                     await _adminOperation.BlockArticlesByKeywordAsync();
                     break;
-                case "10":
+                case "9":
                     Console.WriteLine(" Logged out successfully.");
                     return false;
                 default:

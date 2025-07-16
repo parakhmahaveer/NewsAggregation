@@ -111,42 +111,6 @@ namespace NewsAggrigation.Controller
             }
         }
 
-        [HttpDelete("{categoryId}")]
-        public async Task<IActionResult> DeleteCategoryAsync(int categoryId)
-        {
-            try
-            {
-                await _categoryService.DeleteCategoryAsync(categoryId);
-                return NoContent();
-            }
-            catch (ApiExceptionHelper ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "Failed to delete category." + ex.Message });
-            }
-        }
-
-        [HttpDelete("keywords/{keywordId}")]
-        public async Task<IActionResult> DeleteKeywordAsync(int keywordId)
-        {
-            try
-            {
-                await _categoryService.DeleteKeywordAsync(keywordId);
-                return NoContent();
-            }
-            catch (ApiExceptionHelper ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "Failed to delete keyword." + ex.Message });
-            }
-        }
-
         [HttpPost("{categoryId}/hide")]
         public async Task<IActionResult> HideCategoryAsync(int categoryId)
         {
@@ -176,7 +140,8 @@ namespace NewsAggrigation.Controller
         }
 
         [HttpPost("block")]
-        public async Task<IActionResult> BlockArticlesByKeywordAsync([FromBody] string keyword)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BlockArticlesByKeywordAsync([FromQuery] string keyword)
         {
             try
             {

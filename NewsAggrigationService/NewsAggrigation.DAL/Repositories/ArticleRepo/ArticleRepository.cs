@@ -44,11 +44,10 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
             {
                 query = query.Where(a =>
                     a.Category.CategoryName.ToLower() == request.Category.ToLower());
-                // OR string.Equals(..., ..., OrdinalIgnoreCase)
             }
 
             return await query
-                .Where(a => a.PublishedDate >= startDate && a.PublishedDate < endDate.AddDays(1)) // inclusive
+                .Where(a => a.PublishedDate >= startDate && a.PublishedDate < endDate.AddDays(1)) 
                 .Select(a => new NewsResponse
                 {
                     ArticleId = a.ArticleId,

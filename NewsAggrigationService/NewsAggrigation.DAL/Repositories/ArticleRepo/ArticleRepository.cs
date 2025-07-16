@@ -249,6 +249,18 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         {
             article.IsDeleted = true;
             _context.Articles.Update(article);
+
+            // Also hide all related Saved articles
+            var savedArticles = await _context.SavedArticles
+                .Where(sa => sa.ArticleId == article.ArticleId && !sa.IsDeleted)
+                .ToListAsync();
+
+            foreach (var saved in savedArticles)
+            {
+                saved.IsDeleted = true;
+            }
+            _context.SavedArticles.UpdateRange(savedArticles);
+
             await _context.SaveChangesAsync();
         }
 
@@ -256,12 +268,29 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         {
             article.IsDeleted = false;
             _context.Articles.Update(article);
+
+            var savedArticles = await _context.SavedArticles
+                .IgnoreQueryFilters()
+                .Where(sa => sa.ArticleId == article.ArticleId && sa.IsDeleted)
+                .ToListAsync();
+
+            foreach (var saved in savedArticles)
+            {
+                saved.IsDeleted = true;
+            }
+            _context.SavedArticles.UpdateRange(savedArticles);
+
             await _context.SaveChangesAsync();
         }
 
         public async Task<Article?> GetByIdAsync(int articleId)
         {
             return await _context.Articles.FirstOrDefaultAsync(a => a.ArticleId == articleId);
+        }
+
+        public async Task<Article?> GetDeletedByIdAsync(int articleId)
+        {
+            return await _context.Articles.IgnoreQueryFilters().FirstOrDefaultAsync(a => a.ArticleId == articleId);
         }
 
         public async Task<IEnumerable<Article>> GetRecommendedArticlesForTodayAsync(int userId)

@@ -27,5 +27,6 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
         Task<Article?> GetByIdAsync(int articleId);
         Task<IEnumerable<Article>> GetRecommendedArticlesForTodayAsync(int userId);
         Task<bool> HasUserReportedAsync(int articleId, int userId);
+        Task<Article?> GetDeletedByIdAsync(int articleId);
     }
 }

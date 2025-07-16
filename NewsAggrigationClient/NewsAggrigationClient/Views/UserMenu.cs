@@ -269,6 +269,7 @@ namespace NewsAggrigationClient.Views
 
         private async Task ShowNotificationConfigMenuAsync()
         {
+            await _userOperation.ViewNotificationConfigAsync();
             while (true)
             {
                 Console.WriteLine("\n--- Configure Notifications ---");

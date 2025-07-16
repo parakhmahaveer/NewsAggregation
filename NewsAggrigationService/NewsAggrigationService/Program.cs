@@ -19,6 +19,8 @@ using NewsAggrigation.DAL.Repositories.CategoryRepo;
 using NewsAggrigation.DAL.Repositories.ExternalApiRepo;
 using NewsAggrigation.DAL.Repositories.NotificationRepo;
 using NewsAggrigationService.Middleware;
+using NLog;
+using NLog.Web;
 using System;
 using System.Text;
 
@@ -28,7 +30,10 @@ namespace NewsAggrigationService
     {
         public static void Main(string[] args)
         {
+            var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
             var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+            builder.Host.UseNLog();
 
             // Add services to the container.
             builder.Services.AddDbContext<NewsAggregatorDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("NewsAggregatorDB")));

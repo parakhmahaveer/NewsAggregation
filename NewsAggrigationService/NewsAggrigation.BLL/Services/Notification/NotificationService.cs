@@ -1,7 +1,9 @@
-﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+﻿using NewsAggrigation.API.DataDTOs;
+using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.DAL.Models;
+using NewsAggrigation.DAL.Repositories.CategoryRepo;
 using NewsAggrigation.DAL.Repositories.NotificationRepo;
 
 namespace NewsAggrigation.BLL.Services.Notification
@@ -9,17 +11,20 @@ namespace NewsAggrigation.BLL.Services.Notification
     public class NotificationService : INotificationService
     {
         public INotificationRepository _notificationRepo;
+        public ICategoryRepository _categoryRepo;
         private readonly IUserIdentityContext _userIdentityContext;
 
-        public NotificationService(INotificationRepository notificationRepo, IUserIdentityContext userIdentityContext)
+        public NotificationService(INotificationRepository notificationRepo, IUserIdentityContext userIdentityContext, ICategoryRepository categoryRepo)
         {
             _notificationRepo = notificationRepo;
             _userIdentityContext = userIdentityContext;
+            _categoryRepo = categoryRepo;
         }
 
         public async Task<List<NotificationResponse>> GetUserNotificationsAsync(int userId)
         {
             var notifications = await _notificationRepo.GetUserNotificationsAsync(userId);
+            await _notificationRepo.HideNotificationAsync(notifications);
 
             return notifications.Select(n => new NotificationResponse
             {
@@ -78,13 +83,21 @@ namespace NewsAggrigation.BLL.Services.Notification
 
         public async Task<NotificationConfigResponse> GetUserNotificationConfigAsync(int userId)
         {
-            var categories = await _notificationRepo.GetUserCategoryNotificationPreferencesAsync(userId);
-            var keywords = await _notificationRepo.GetUserKeywordNotificationPreferencesAsync(userId);
+            var categories = await _categoryRepo.GetAllAsync();
+            var categoryConfig = await _notificationRepo.GetUserCategoryNotificationPreferencesAsync(userId);
+
+            var categoryStatus = categories.Select(category => new CategoryStatusDto
+            {
+                CategoryName = category.CategoryName,
+                IsEnabled = categoryConfig.Contains(category.CategoryName)
+            }).ToList();
+
+            var keywordConfig = await _notificationRepo.GetUserKeywordNotificationPreferencesAsync(userId);
 
             return new NotificationConfigResponse
             {
-                Categories = categories,
-                Keywords = keywords
+                Categories = categoryStatus,
+                Keywords = keywordConfig
             };
         }
     }

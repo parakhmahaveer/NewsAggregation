@@ -78,9 +78,21 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
         public async Task<List<string>> GetUserKeywordNotificationPreferencesAsync(int userId)
         {
             return await _context.Keywords
-                .Where(k => k.UserId == userId && k.IsEnabled && !k.IsDeleted)
+                .Where(k => k.UserId == userId && !k.IsDeleted)
                 .Select(k => k.Word)
                 .ToListAsync();
+        }
+
+        public async Task<bool> HideNotificationAsync(List<Notification> notifications)
+        {
+            var toHide = notifications.Take(5).ToList();
+            foreach (var notification in toHide)
+            {
+                notification.IsDeleted = true;
+                _context.Notifications.Update(notification);
+            }
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

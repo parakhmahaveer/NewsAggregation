@@ -15,5 +15,6 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
         Task SaveChangesAsync();
         Task<List<string>> GetUserCategoryNotificationPreferencesAsync(int userId);
         Task<List<string>> GetUserKeywordNotificationPreferencesAsync(int userId);
+        Task<bool> HideNotificationAsync(List<Notification> notifications);
     }
 }

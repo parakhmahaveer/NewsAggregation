@@ -72,12 +72,12 @@ namespace NewsAggrigation.Controller
             }
         }
 
-        [HttpPatch("{apiId}")]
-        public async Task<IActionResult> UpdateExternalApiAsync(int apiId, [FromBody] ExternalApiUpdateRequest request)
+        [HttpPatch("update")]
+        public async Task<IActionResult> UpdateExternalApiAsync([FromBody] ExternalApiUpdateRequest request)
         {
             try
             {
-                var updatedApi = await _externalApiService.UpdateAsync(apiId, request);
+                var updatedApi = await _externalApiService.UpdateExternalApiAsync(request);
                 return updatedApi != null ? Ok(updatedApi) : NotFound(new { Message = "External API not found." });
             }
             catch (ApiExceptionHelper ex)

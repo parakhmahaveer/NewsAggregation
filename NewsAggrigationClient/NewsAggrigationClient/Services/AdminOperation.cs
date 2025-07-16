@@ -48,13 +48,7 @@ namespace NewsAggrigationClient.Services
                     return;
                 }
 
-                Console.WriteLine("\nList of external servers:");
-                foreach (var api in servers)
-                {
-                    var status = api.IsActive ? "Active" : "Not Active";
-                    var lastAccess = api.LastAccessedAt.ToString("dd MMM yyyy") ?? "N/A";
-                    Console.WriteLine($"{api.Id}. {api.ApiName} - {status} - last accessed: {lastAccess}");
-                }
+                PrintExternalServersTable(servers);
             }
             catch (Exception ex)
             {
@@ -87,11 +81,7 @@ namespace NewsAggrigationClient.Services
                 return;
             }
 
-            Console.WriteLine("\nList of external server details:");
-            foreach (var api in servers)
-            {
-                Console.WriteLine($"{api.Id}. {api.ApiName} - {api.ApiKey}");
-            }
+            PrintExternalServerDetails(servers);
         }
 
         public async Task AddCategoryAsync()
@@ -127,16 +117,42 @@ namespace NewsAggrigationClient.Services
         public async Task UpdateExternalServerAsync()
         {
             Console.Write("Enter API ID to update: ");
-            var id = Console.ReadLine();
-            Console.Write("New API Key: ");
+            var idInput = Console.ReadLine();
+
+            // Prompt for each field
+            Console.Write("New API Key (leave blank to keep unchanged): ");
             var apiKey = Console.ReadLine();
 
-            var updateRequest = new ExternalApiUpdateRequest
-            {
-                ApiKey = apiKey
-            };
+            Console.Write("New API Name (leave blank to keep unchanged): ");
+            var apiName = Console.ReadLine();
 
-            var response = await _httpClient.PatchAsync($"api/ExternalApis/{id}",
+            Console.Write("New API URL (leave blank to keep unchanged): ");
+            var apiUrl = Console.ReadLine();
+
+            // Build the update request
+            var updateRequest = new ExternalApiUpdateRequest();
+
+            // Set the ID (required)
+            if (int.TryParse(idInput, out int id))
+                updateRequest.ApiId = id;
+            else
+            {
+                Console.WriteLine("Invalid ID.");
+                return;
+            }
+
+            // Set only provided fields
+            if (!string.IsNullOrWhiteSpace(apiKey))
+                updateRequest.ApiKey = apiKey;
+
+            if (!string.IsNullOrWhiteSpace(apiName))
+                updateRequest.ApiName = apiName;
+
+            if (!string.IsNullOrWhiteSpace(apiUrl))
+                updateRequest.ApiUrl = apiUrl;
+
+            var response = await _httpClient.PatchAsync(
+                "api/ExternalApis/update",
                 new StringContent(
                     JsonSerializer.Serialize(updateRequest),
                     Encoding.UTF8,
@@ -155,21 +171,30 @@ namespace NewsAggrigationClient.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine("❌ Failed to fetch reported articles.");
+                Console.WriteLine("Failed to fetch reported articles.");
                 Console.WriteLine(content);
                 return;
             }
 
-            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(content);
+            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
-            Console.WriteLine("\nReported Articles:");
-            int index = 1;
+            if (articles == null || !articles.Any())
+            {
+                Console.WriteLine("No articles found.");
+                return;
+            }
+
+            Console.WriteLine("====== Reported Articles ======");
             foreach (var article in articles)
             {
-                Console.WriteLine($"\n{index++}. {article.Title}");
-                Console.WriteLine($"   Source: {article.Source}");
-                //Console.WriteLine($"   Date  : {article.:dd MMM yyyy}");
-                Console.WriteLine($"   URL   : {article.Url}");
+                Console.WriteLine($"\nArticle Id: {article.ArticleId}");
+                Console.WriteLine($"Title      : {article.Title}");
+                Console.WriteLine($"Source     : {article.Source}");
+                Console.WriteLine($"URL        : {article.Url}");
+                Console.WriteLine($"Category   : {article.Category}");
             }
         }
 
@@ -227,45 +252,13 @@ namespace NewsAggrigationClient.Services
 
             if (endpoint == null)
             {
-                Console.WriteLine("❌ Invalid option.");
+                Console.WriteLine("Invalid option.");
                 return;
             }
 
             var response = await _httpClient.PostAsync(endpoint, null);
             Console.WriteLine(response.IsSuccessStatusCode
                 ? "Category visibility updated."
-                : $"Failed: {await response.Content.ReadAsStringAsync()}");
-        }
-
-        public async Task ToggleKeywordVisibilityAsync()
-        {
-            Console.Write("Enter Category Keyword ID to toggle visibility: ");
-            var input = Console.ReadLine();
-
-            if (!int.TryParse(input, out int keywordId))
-            {
-                Console.WriteLine("❌ Invalid Keyword ID.");
-                return;
-            }
-
-            Console.Write("Do you want to (h)ide or (u)nhide the keyword? ");
-            var option = Console.ReadLine()?.ToLower();
-
-            string endpoint = option == "h"
-                ? $"api/categories/keywords/{keywordId}/hide"
-                : option == "u"
-                    ? $"api/categories/keywords/{keywordId}/unhide"
-                    : null;
-
-            if (endpoint == null)
-            {
-                Console.WriteLine("❌ Invalid option.");
-                return;
-            }
-
-            var response = await _httpClient.PostAsync(endpoint, null);
-            Console.WriteLine(response.IsSuccessStatusCode
-                ? "Keyword visibility updated."
                 : $"Failed: {await response.Content.ReadAsStringAsync()}");
         }
 
@@ -292,5 +285,54 @@ namespace NewsAggrigationClient.Services
                 Console.WriteLine($"Failed to block keyword: {error}");
             }
         }
+
+        #region Private Methods
+        private static void PrintExternalServersTable(List<ExternalApiResponse> servers)
+        {
+            Console.WriteLine("\n========== External Servers List ==========");
+            Console.WriteLine($"Total Servers: {servers.Count}\n");
+
+            // Table column headers
+            string header = string.Format("{0,-5} | {1,-25} | {2,-12} | {3,-15}", "Id", "Name", "Status", "Last Accessed");
+            Console.WriteLine(header);
+            Console.WriteLine(new string('-', header.Length));
+
+            // Table rows
+            foreach (var api in servers)
+            {
+                var status = api.IsActive ? "Active" : "Not Active";
+                var lastAccess = api.LastAccessedAt != default
+                    ? api.LastAccessedAt.ToString("dd MMM yyyy HH:mm:ss")
+                    : "N/A";
+                Console.WriteLine(
+                    string.Format("{0,-5} | {1,-25} | {2,-12} | {3,-15}",
+                        api.Id, api.ApiName, status, lastAccess));
+            }
+
+            // Table footer/context
+            Console.WriteLine("\n========== End of Server List ==========\n");
+        }
+
+        private static void PrintExternalServerDetails(List<ExternalApiResponse> servers)
+        {
+            Console.WriteLine("\n========== External Server Details ==========");
+            Console.WriteLine($"Total Servers: {servers.Count}\n");
+
+            // Table column headers
+            string header = string.Format("{0,-5} | {1,-25} | {2,-35}", "Id", "Name", "API Key");
+            Console.WriteLine(header);
+            Console.WriteLine(new string('-', header.Length));
+
+            // Table rows
+            foreach (var api in servers)
+            {
+                Console.WriteLine(
+                    string.Format("{0,-5} | {1,-25} | {2,-35}",
+                        api.Id, api.ApiName, api.ApiKey));
+            }
+
+            Console.WriteLine("\n========== End of Server Details ==========\n");
+        }
+        #endregion
     }
 }

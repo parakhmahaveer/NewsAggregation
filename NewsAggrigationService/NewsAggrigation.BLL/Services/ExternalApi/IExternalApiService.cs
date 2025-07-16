@@ -13,7 +13,7 @@ namespace NewsAggrigation.BLL.Services.ExternalApi
         Task<IEnumerable<ExternalApiResponse>> GetAllAsync();
         Task<ExternalApiResponse> GetByIdAsync(int id);
         Task<ExternalApiResponse> AddAsync(ExternalApiRequest dto);
-        Task<ExternalApiResponse> UpdateAsync(int id, ExternalApiUpdateRequest dto);
+        Task<ExternalApiResponse> UpdateExternalApiAsync(ExternalApiUpdateRequest dto);
         Task<bool> DeleteAsync(int id);
     }
 }

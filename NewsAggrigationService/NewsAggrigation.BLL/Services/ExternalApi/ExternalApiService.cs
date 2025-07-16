@@ -46,9 +46,9 @@ namespace NewsAggrigation.BLL.Services.ExternalApi
             return MapToResponse(savedConfig);
         }
 
-        public async Task<ExternalApiResponse> UpdateAsync(int id, ExternalApiUpdateRequest request)
+        public async Task<ExternalApiResponse> UpdateExternalApiAsync(ExternalApiUpdateRequest request)
         {
-            var config = await _repository.GetByIdAsync(id) ?? throw new NotFoundException($"Config with ID {id} not found.");
+            var config = await _repository.GetByIdAsync(request.ApiId) ?? throw new NotFoundException($"Config with ID {request.ApiId} not found.");
 
             if (request.ApiName is not null)
                 config.Name = request.ApiName;

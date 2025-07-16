@@ -15,7 +15,6 @@ namespace NewsAggrigationClient.Services.Interfaces
         Task ViewReportedArticlesAsync();
         Task ToggleArticleVisibilityAsync();
         Task ToggleCategoryVisibilityAsync();
-        Task ToggleKeywordVisibilityAsync();
         Task BlockArticlesByKeywordAsync();
     }
 }

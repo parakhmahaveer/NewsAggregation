@@ -103,6 +103,11 @@ namespace NewsAggrigationClient.Views
                             Console.WriteLine("Invalid date format.");
                             break;
                         }
+                        if (!IsStartDateBeforeEndDate(startDate, endDate))
+                        {
+                            Console.WriteLine("Start date must be earlier than or equal to end date.");
+                            return;
+                        }
                         await ShowHeadlinesByCategoryMenuAsync(startDate, endDate);
                         break;
 
@@ -114,6 +119,15 @@ namespace NewsAggrigationClient.Views
                         break;
                 }
             }
+        }
+
+        private bool IsStartDateBeforeEndDate(string startDate, string endDate)
+        {
+            if (DateTime.TryParse(startDate, out DateTime start) && DateTime.TryParse(endDate, out DateTime end))
+            {
+                return start <= end;
+            }
+            return false;
         }
 
         private async Task ShowHeadlinesByCategoryMenuAsync(string startDate, string endDate)
@@ -269,9 +283,10 @@ namespace NewsAggrigationClient.Views
 
         private async Task ShowNotificationConfigMenuAsync()
         {
-            await _userOperation.ViewNotificationConfigAsync();
             while (true)
             {
+                await _userOperation.ViewNotificationConfigAsync();
+
                 Console.WriteLine("\n--- Configure Notifications ---");
                 Console.WriteLine("1. Enable/Disable Category Notification");
                 Console.WriteLine("2. Set Keywords for Notification");

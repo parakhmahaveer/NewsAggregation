@@ -58,30 +58,37 @@ namespace NewsAggrigationClient.Services
 
         public async Task ViewExternalServerDetailsAsync()
         {
-            var response = await _httpClient.GetAsync("api/ExternalApis");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine($"Error: {response.ReasonPhrase}");
-                return;
+                var response = await _httpClient.GetAsync("api/ExternalApis");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Error: {response.ReasonPhrase}");
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var servers = JsonSerializer.Deserialize<List<ExternalApiResponse>>(json, options);
+
+                if (servers == null || !servers.Any())
+                {
+                    Console.WriteLine("No external servers found.");
+                    return;
+                }
+
+                PrintExternalServerDetails(servers);
             }
-
-            var json = await response.Content.ReadAsStringAsync();
-
-            var options = new JsonSerializerOptions
+            catch (Exception ex)
             {
-                PropertyNameCaseInsensitive = true
-            };
-
-            var servers = JsonSerializer.Deserialize<List<ExternalApiResponse>>(json, options);
-
-            if (servers == null || !servers.Any())
-            {
-                Console.WriteLine("No external servers found.");
-                return;
+                Console.WriteLine($"Error in fetching External Server Details: {ex.Message}");
             }
-
-            PrintExternalServerDetails(servers);
         }
 
         public async Task AddCategoryAsync()
@@ -116,173 +123,208 @@ namespace NewsAggrigationClient.Services
 
         public async Task UpdateExternalServerAsync()
         {
-            Console.Write("Enter API ID to update: ");
-            var idInput = Console.ReadLine();
-
-            // Prompt for each field
-            Console.Write("New API Key (leave blank to keep unchanged): ");
-            var apiKey = Console.ReadLine();
-
-            Console.Write("New API Name (leave blank to keep unchanged): ");
-            var apiName = Console.ReadLine();
-
-            Console.Write("New API URL (leave blank to keep unchanged): ");
-            var apiUrl = Console.ReadLine();
-
-            // Build the update request
-            var updateRequest = new ExternalApiUpdateRequest();
-
-            // Set the ID (required)
-            if (int.TryParse(idInput, out int id))
-                updateRequest.ApiId = id;
-            else
+            try
             {
-                Console.WriteLine("Invalid ID.");
-                return;
+                Console.Write("Enter API ID to update: ");
+                var idInput = Console.ReadLine();
+
+                // Prompt for each field
+                Console.Write("New API Key (leave blank to keep unchanged): ");
+                var apiKey = Console.ReadLine();
+
+                Console.Write("New API Name (leave blank to keep unchanged): ");
+                var apiName = Console.ReadLine();
+
+                Console.Write("New API URL (leave blank to keep unchanged): ");
+                var apiUrl = Console.ReadLine();
+
+                // Build the update request
+                var updateRequest = new ExternalApiUpdateRequest();
+
+                // Set the ID (required)
+                if (int.TryParse(idInput, out int id))
+                    updateRequest.ApiId = id;
+                else
+                {
+                    Console.WriteLine("Invalid ID.");
+                    return;
+                }
+
+                // Set only provided fields
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                    updateRequest.ApiKey = apiKey;
+
+                if (!string.IsNullOrWhiteSpace(apiName))
+                    updateRequest.ApiName = apiName;
+
+                if (!string.IsNullOrWhiteSpace(apiUrl))
+                    updateRequest.ApiUrl = apiUrl;
+
+                var response = await _httpClient.PatchAsync(
+                    "api/ExternalApis/update",
+                    new StringContent(
+                        JsonSerializer.Serialize(updateRequest),
+                        Encoding.UTF8,
+                        "application/json"));
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(response.IsSuccessStatusCode
+                    ? "API updated successfully."
+                    : $"Error: {content}");
             }
-
-            // Set only provided fields
-            if (!string.IsNullOrWhiteSpace(apiKey))
-                updateRequest.ApiKey = apiKey;
-
-            if (!string.IsNullOrWhiteSpace(apiName))
-                updateRequest.ApiName = apiName;
-
-            if (!string.IsNullOrWhiteSpace(apiUrl))
-                updateRequest.ApiUrl = apiUrl;
-
-            var response = await _httpClient.PatchAsync(
-                "api/ExternalApis/update",
-                new StringContent(
-                    JsonSerializer.Serialize(updateRequest),
-                    Encoding.UTF8,
-                    "application/json"));
-
-            var content = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(response.IsSuccessStatusCode
-                ? "API updated successfully."
-                : $"Error: {content}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in updating External Server Details: {ex.Message}");
+            }
         }
 
         public async Task ViewReportedArticlesAsync()
         {
-            var response = await _httpClient.GetAsync("api/news/reported");
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine("Failed to fetch reported articles.");
-                Console.WriteLine(content);
-                return;
+                var response = await _httpClient.GetAsync("api/news/reported");
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Failed to fetch reported articles.");
+                    Console.WriteLine(content);
+                    return;
+                }
+
+                var articles = JsonSerializer.Deserialize<List<NewsResponse>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (articles == null || !articles.Any())
+                {
+                    Console.WriteLine("No articles found.");
+                    return;
+                }
+
+                Console.WriteLine("====== Reported Articles ======");
+                foreach (var article in articles)
+                {
+                    Console.WriteLine($"\nArticle Id: {article.ArticleId}");
+                    Console.WriteLine($"Title      : {article.Title}");
+                    Console.WriteLine($"Source     : {article.Source}");
+                    Console.WriteLine($"URL        : {article.Url}");
+                    Console.WriteLine($"Category   : {article.Category}");
+                }
             }
-
-            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(content, new JsonSerializerOptions
+            catch (Exception ex)
             {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (articles == null || !articles.Any())
-            {
-                Console.WriteLine("No articles found.");
-                return;
-            }
-
-            Console.WriteLine("====== Reported Articles ======");
-            foreach (var article in articles)
-            {
-                Console.WriteLine($"\nArticle Id: {article.ArticleId}");
-                Console.WriteLine($"Title      : {article.Title}");
-                Console.WriteLine($"Source     : {article.Source}");
-                Console.WriteLine($"URL        : {article.Url}");
-                Console.WriteLine($"Category   : {article.Category}");
+                Console.WriteLine($"Error in fetching reported articles: {ex.Message}");
             }
         }
 
         public async Task ToggleArticleVisibilityAsync()
         {
-            Console.Write("Enter Article ID to toggle visibility: ");
-            var input = Console.ReadLine();
-
-            if (!int.TryParse(input, out int articleId))
+            try
             {
-                Console.WriteLine("Invalid Article ID.");
-                return;
+                Console.Write("Enter Article ID to toggle visibility: ");
+                var input = Console.ReadLine();
+
+                if (!int.TryParse(input, out int articleId))
+                {
+                    Console.WriteLine("Invalid Article ID.");
+                    return;
+                }
+
+                Console.Write("Do you want to (h)ide or (u)nhide the article? ");
+                var option = Console.ReadLine()?.ToLower();
+
+                string endpoint = option == "h"
+                    ? $"api/news/{articleId}/hide"
+                    : option == "u"
+                        ? $"api/news/{articleId}/unhide"
+                        : null;
+
+                if (endpoint == null)
+                {
+                    Console.WriteLine("❌ Invalid option.");
+                    return;
+                }
+
+                var response = await _httpClient.PostAsync(endpoint, null);
+                Console.WriteLine(response.IsSuccessStatusCode
+                    ? "Article visibility updated."
+                    : $"Failed: {await response.Content.ReadAsStringAsync()}");
             }
-
-            Console.Write("Do you want to (h)ide or (u)nhide the article? ");
-            var option = Console.ReadLine()?.ToLower();
-
-            string endpoint = option == "h"
-                ? $"api/news/{articleId}/hide"
-                : option == "u"
-                    ? $"api/news/{articleId}/unhide"
-                    : null;
-
-            if (endpoint == null)
+            catch (Exception ex)
             {
-                Console.WriteLine("❌ Invalid option.");
-                return;
+                Console.WriteLine($"Error in toggling article visibility: {ex.Message}");
             }
-
-            var response = await _httpClient.PostAsync(endpoint, null);
-            Console.WriteLine(response.IsSuccessStatusCode
-                ? "Article visibility updated."
-                : $"Failed: {await response.Content.ReadAsStringAsync()}");
         }
 
         public async Task ToggleCategoryVisibilityAsync()
         {
-            Console.Write("Enter Category ID to toggle visibility: ");
-            var input = Console.ReadLine();
-
-            if (!int.TryParse(input, out int categoryId))
+            try
             {
-                Console.WriteLine("Invalid Category ID.");
-                return;
+                Console.Write("Enter Category ID to toggle visibility: ");
+                var input = Console.ReadLine();
+
+                if (!int.TryParse(input, out int categoryId))
+                {
+                    Console.WriteLine("Invalid Category ID.");
+                    return;
+                }
+
+                Console.Write("Do you want to (h)ide or (u)nhide the category? ");
+                var option = Console.ReadLine()?.ToLower();
+
+                string endpoint = option == "h"
+                    ? $"api/categories/{categoryId}/hide"
+                    : option == "u"
+                        ? $"api/categories/{categoryId}/unhide"
+                        : null;
+
+                if (endpoint == null)
+                {
+                    Console.WriteLine("Invalid option.");
+                    return;
+                }
+
+                var response = await _httpClient.PostAsync(endpoint, null);
+                Console.WriteLine(response.IsSuccessStatusCode
+                    ? "Category visibility updated."
+                    : $"Failed: {await response.Content.ReadAsStringAsync()}");
             }
-
-            Console.Write("Do you want to (h)ide or (u)nhide the category? ");
-            var option = Console.ReadLine()?.ToLower();
-
-            string endpoint = option == "h"
-                ? $"api/categories/{categoryId}/hide"
-                : option == "u"
-                    ? $"api/categories/{categoryId}/unhide"
-                    : null;
-
-            if (endpoint == null)
+            catch (Exception ex)
             {
-                Console.WriteLine("Invalid option.");
-                return;
+                Console.WriteLine($"Error in toggling category visibility: {ex.Message}");
             }
-
-            var response = await _httpClient.PostAsync(endpoint, null);
-            Console.WriteLine(response.IsSuccessStatusCode
-                ? "Category visibility updated."
-                : $"Failed: {await response.Content.ReadAsStringAsync()}");
         }
 
         public async Task BlockArticlesByKeywordAsync()
         {
-            Console.Write("Enter keyword to block articles containing it: ");
-            var keyword = Console.ReadLine();
-
-            if (string.IsNullOrWhiteSpace(keyword))
+            try
             {
-                Console.WriteLine("Keyword cannot be empty.");
-                return;
+                Console.Write("Enter keyword to block articles containing it: ");
+                var keyword = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    Console.WriteLine("Keyword cannot be empty.");
+                    return;
+                }
+
+                var response = await _httpClient.PostAsync($"api/categories/block?keyword={Uri.EscapeDataString(keyword)}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Articles containing '{keyword}' were blocked.");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Failed to block keyword: {error}");
+                }
             }
-
-            var response = await _httpClient.PostAsync($"api/categories/block?keyword={Uri.EscapeDataString(keyword)}", null);
-
-            if (response.IsSuccessStatusCode)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Articles containing '{keyword}' were blocked.");
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to block keyword: {error}");
+                Console.WriteLine($"Error in blocking articles: {ex.Message}");
             }
         }
 

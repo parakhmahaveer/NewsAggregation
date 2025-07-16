@@ -19,35 +19,42 @@ namespace NewsAggrigationClient.Services
         }
         public async Task ViewTodaysNewsAsync()
         {
-            var response = await _httpClient.GetAsync("api/news/today");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine("Failed to fetch today's news.");
-                return;
+                var response = await _httpClient.GetAsync("api/news/today");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Failed to fetch today's news.");
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (articles == null || !articles.Any())
+                {
+                    Console.WriteLine("No articles found for today.");
+                    return;
+                }
+
+                Console.WriteLine("\nToday's News:");
+                foreach (var article in articles)
+                {
+                    Console.WriteLine($"\nArticle Id: {article.ArticleId}");
+                    Console.WriteLine($"Title      : {article.Title}");
+                    Console.WriteLine($"Description: {article.Content}");
+                    Console.WriteLine($"Source     : {article.Source}");
+                    Console.WriteLine($"URL        : {article.Url}");
+                    Console.WriteLine($"Category   : {article.Category}");
+                }
             }
-
-            var json = await response.Content.ReadAsStringAsync();
-            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
+            catch (Exception ex)
             {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (articles == null || !articles.Any())
-            {
-                Console.WriteLine("No articles found for today.");
-                return;
-            }
-
-            Console.WriteLine("\nToday's News:");
-            foreach (var article in articles)
-            {
-                Console.WriteLine($"\nArticle Id: {article.ArticleId}");
-                Console.WriteLine($"Title      : {article.Title}");
-                Console.WriteLine($"Description: {article.Content}");
-                Console.WriteLine($"Source     : {article.Source}");
-                Console.WriteLine($"URL        : {article.Url}");
-                Console.WriteLine($"Category   : {article.Category}");
+                Console.WriteLine($"Error fetching today's news: {ex.Message}");
             }
         }
 
@@ -185,306 +192,370 @@ namespace NewsAggrigationClient.Services
 
         public async Task ViewHeadlinesAsync(NewsByCategoryRequest request)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/news/category", request);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine("Failed to fetch articles.");
-                return;
+                var response = await _httpClient.PostAsJsonAsync("api/news/category", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Failed to fetch articles.");
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (articles == null || !articles.Any())
+                {
+                    Console.WriteLine("No articles found.");
+                    return;
+                }
+
+                Console.WriteLine($"\n{request.Category?.ToUpper() ?? "ALL"} Articles ({request.StartDate} to {request.EndDate}):");
+                foreach (var article in articles)
+                {
+                    Console.WriteLine($"\nArticle Id: {article.ArticleId}");
+                    Console.WriteLine($"Title      : {article.Title}");
+                    Console.WriteLine($"Description: {article.Content}");
+                    Console.WriteLine($"Source     : {article.Source}");
+                    Console.WriteLine($"URL        : {article.Url}");
+                    Console.WriteLine($"Category   : {article.Category}");
+                }
             }
-
-            var json = await response.Content.ReadAsStringAsync();
-            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
+            catch (Exception ex)
             {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (articles == null || !articles.Any())
-            {
-                Console.WriteLine("No articles found.");
-                return;
-            }
-
-            Console.WriteLine($"\n{request.Category?.ToUpper() ?? "ALL"} Articles ({request.StartDate} to {request.EndDate}):");
-            foreach (var article in articles)
-            {
-                Console.WriteLine($"\nArticle Id: {article.ArticleId}");
-                Console.WriteLine($"Title      : {article.Title}");
-                Console.WriteLine($"Description: {article.Content}");
-                Console.WriteLine($"Source     : {article.Source}");
-                Console.WriteLine($"URL        : {article.Url}");
-                Console.WriteLine($"Category   : {article.Category}");
+                Console.WriteLine($"Error while loading headlines: {ex.Message}");
             }
         }
 
         public async Task ReactToArticleAsync()
         {
-            Console.Write("Enter the Article ID to react: ");
-            var articleIdInput = Console.ReadLine();
-
-            if (!int.TryParse(articleIdInput, out int articleId))
+            try
             {
-                Console.WriteLine("Invalid article ID.");
-                return;
+                Console.Write("Enter the Article ID to react: ");
+                var articleIdInput = Console.ReadLine();
+
+                if (!int.TryParse(articleIdInput, out int articleId))
+                {
+                    Console.WriteLine("Invalid article ID.");
+                    return;
+                }
+
+                Console.Write("Do you want to like or dislike? (like/dislike): ");
+                var input = Console.ReadLine()?.Trim().ToLower();
+
+                bool isLiked;
+                if (input == "like")
+                {
+                    isLiked = true;
+                }
+                else if (input == "dislike")
+                {
+                    isLiked = false;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Type 'like' or 'dislike'.");
+                    return;
+                }
+
+                var request = new ArticleReactionRequest
+                {
+                    IsLiked = isLiked,
+                    ArticleId = articleId
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"api/news/react", request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"{message}");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Failed to react. {response.StatusCode}: {error}");
+                }
             }
-
-            Console.Write("Do you want to like or dislike? (like/dislike): ");
-            var input = Console.ReadLine()?.Trim().ToLower();
-
-            bool isLiked;
-            if (input == "like")
+            catch (Exception ex)
             {
-                isLiked = true;
-            }
-            else if (input == "dislike")
-            {
-                isLiked = false;
-            }
-            else
-            {
-                Console.WriteLine("Invalid input. Type 'like' or 'dislike'.");
-                return;
-            }
-
-            var request = new ArticleReactionRequest
-            {
-                IsLiked = isLiked,
-                ArticleId = articleId
-            };
-
-            var response = await _httpClient.PostAsJsonAsync($"api/news/react", request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var message = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"{message}");
-            }
-            else
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to react. {response.StatusCode}: {error}");
+                Console.WriteLine($"Error reacting to article: {ex.Message}");
             }
         }
 
         public async Task SearchArticlesAsync()
         {
-            Console.Write("Enter search query: ");
-            var query = Console.ReadLine();
-
-            Console.Write("Enter start date (yyyy-MM-dd): ");
-            var startDate = Console.ReadLine();
-
-            Console.Write("Enter end date (yyyy-MM-dd): ");
-            var endDate = Console.ReadLine();
-
-            Console.Write("Sort by (likes/dislikes): ");
-            var sort = Console.ReadLine()?.ToLower();
-
-            // Validate input
-            if (!DateTime.TryParse(startDate, out _) || !DateTime.TryParse(endDate, out _))
+            try
             {
-                Console.WriteLine("Invalid date format.");
-                return;
+                Console.Write("Enter search query: ");
+                var query = Console.ReadLine();
+
+                Console.Write("Enter start date (yyyy-MM-dd): ");
+                var startDate = Console.ReadLine();
+
+                Console.Write("Enter end date (yyyy-MM-dd): ");
+                var endDate = Console.ReadLine();
+
+                Console.Write("Sort by (likes/dislikes): ");
+                var sort = Console.ReadLine()?.ToLower();
+
+                // Validate input
+                if (!DateTime.TryParse(startDate, out _) || !DateTime.TryParse(endDate, out _))
+                {
+                    Console.WriteLine("Invalid date format.");
+                    return;
+                }
+                if (!IsStartDateBeforeEndDate(startDate, endDate))
+                {
+                    Console.WriteLine("Start date must be earlier than or equal to end date.");
+                    return;
+                }
+
+                var request = new SearchRequest
+                {
+                    Query = query,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    SortBy = sort
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("api/news/search", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Search failed: {response.StatusCode}");
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (articles == null || articles.Count == 0)
+                {
+                    Console.WriteLine("No articles found.");
+                    return;
+                }
+
+                Console.WriteLine("\n Search Results:");
+                foreach (var article in articles)
+                {
+                    Console.WriteLine($"\nID         : {article.ArticleId}");
+                    Console.WriteLine($"Title      : {article.Title}");
+                    Console.WriteLine($"Source     : {article.Source}");
+                    Console.WriteLine($"URL        : {article.Url}");
+                    Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
+                    Console.WriteLine($"Category   : {article.Category}");
+                }
             }
-            if (!IsStartDateBeforeEndDate(startDate, endDate))
+            catch (Exception ex)
             {
-                Console.WriteLine("Start date must be earlier than or equal to end date.");
-                return;
-            }
-
-            var request = new SearchRequest
-            {
-                Query = query,
-                StartDate = startDate,
-                EndDate = endDate,
-                SortBy = sort
-            };
-
-            var response = await _httpClient.PostAsJsonAsync("api/news/search", request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Search failed: {response.StatusCode}");
-                return;
-            }
-
-            var json = await response.Content.ReadAsStringAsync();
-            var articles = JsonSerializer.Deserialize<List<NewsResponse>>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (articles == null || articles.Count == 0)
-            {
-                Console.WriteLine("No articles found.");
-                return;
-            }
-
-            Console.WriteLine("\n Search Results:");
-            foreach (var article in articles)
-            {
-                Console.WriteLine($"\nID         : {article.ArticleId}");
-                Console.WriteLine($"Title      : {article.Title}");
-                Console.WriteLine($"Source     : {article.Source}");
-                Console.WriteLine($"URL        : {article.Url}");
-                Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
-                Console.WriteLine($"Category   : {article.Category}");
+                Console.WriteLine($"Error searching articles: {ex.Message}");
             }
         }
 
         public async Task ViewNotificationsAsync()
         {
-            var response = await _httpClient.GetAsync("api/notifications");
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine($"Error: {content}");
-                return;
+                var response = await _httpClient.GetAsync("api/notifications");
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Error: {content}");
+                    return;
+                }
+
+                var notifications = JsonSerializer.Deserialize<List<NotificationResponse>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (notifications == null || notifications.Count == 0)
+                {
+                    Console.WriteLine("No notifications found.");
+                    return;
+                }
+
+                Console.WriteLine("\nYour Notifications:");
+                int index = 1;
+                foreach (var note in notifications)
+                {
+                    Console.WriteLine($"\n{index++}. {note.Title}");
+                    Console.WriteLine($"    Date   : {note.SentDate:dd MMM yyyy hh:mm tt}");
+                    Console.WriteLine($"    Source : {note.Source}");
+                    Console.WriteLine($"    URL    : {note.Url}");
+                }
             }
-
-            var notifications = JsonSerializer.Deserialize<List<NotificationResponse>>(content, new JsonSerializerOptions
+            catch (Exception ex)
             {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (notifications == null || notifications.Count == 0)
-            {
-                Console.WriteLine("No notifications found.");
-                return;
-            }
-
-            Console.WriteLine("\nYour Notifications:");
-            int index = 1;
-            foreach (var note in notifications)
-            {
-                Console.WriteLine($"\n{index++}. {note.Title}");
-                Console.WriteLine($"    Date   : {note.SentDate:dd MMM yyyy hh:mm tt}");
-                Console.WriteLine($"    Source : {note.Source}");
-                Console.WriteLine($"    URL    : {note.Url}");
+                Console.WriteLine($"Error fetching notifications: {ex.Message}");
             }
         }
 
         public async Task SetCategoryNotificationAsync(string category, bool enabled)
         {
-            var payload = new
+            try
             {
-                CategorySettings = new Dictionary<string, bool>
+                var payload = new
                 {
-                    { category, enabled }
-                }
-            };
+                    CategorySettings = new Dictionary<string, bool>
+                    {
+                        { category, enabled }
+                    }
+                };
 
-            var response = await _httpClient.PostAsJsonAsync("api/notifications/configure/category", payload);
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Category '{category}' notification {(enabled ? "enabled" : "disabled")}.");
+                var response = await _httpClient.PostAsJsonAsync("api/notifications/configure/category", payload);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Category '{category}' notification {(enabled ? "enabled" : "disabled")}.");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Failed to update category notification: {error}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to update category notification: {error}");
+                Console.WriteLine($"Error updating notification category : {ex.Message}");
             }
         }
 
         public async Task SetKeywordNotificationsAsync(List<string> keywords)
         {
-            var payload = new
+            try
             {
-                Keywords = keywords
-            };
+                var payload = new
+                {
+                    Keywords = keywords
+                };
 
-            var response = await _httpClient.PostAsJsonAsync("api/notifications/configure/keyword", payload);
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Keyword notifications updated.");
+                var response = await _httpClient.PostAsJsonAsync("api/notifications/configure/keyword", payload);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Keyword notifications updated.");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Failed to update keyword notifications: {error}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Failed to update keyword notifications: {error}");
+                Console.WriteLine($"Error updating notifications keyword : {ex.Message}");
             }
         }
 
         public async Task ReportArticleAsync()
         {
-            Console.Write("Enter Article ID to report: ");
-            if (!int.TryParse(Console.ReadLine(), out int articleId))
+            try
             {
-                Console.WriteLine("Invalid Article ID.");
-                return;
+                Console.Write("Enter Article ID to report: ");
+                if (!int.TryParse(Console.ReadLine(), out int articleId))
+                {
+                    Console.WriteLine("Invalid Article ID.");
+                    return;
+                }
+
+                var payload = new { }; // server uses token to resolve user
+                var response = await _httpClient.PostAsJsonAsync($"api/news/{articleId}/report", payload);
+
+                Console.WriteLine(response.IsSuccessStatusCode
+                    ? "Article reported."
+                    : "" + await response.Content.ReadAsStringAsync());
             }
-
-            var payload = new { }; // server uses token to resolve user
-            var response = await _httpClient.PostAsJsonAsync($"api/news/{articleId}/report", payload);
-
-            Console.WriteLine(response.IsSuccessStatusCode
-                ? "Article reported."
-                : "" + await response.Content.ReadAsStringAsync());
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reporting article: {ex.Message}");
+            }
         }
 
         public async Task ViewRecommendedArticlesAsync()
         {
-            var response = await _httpClient.GetAsync("api/news/personalized");
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine("Unable to fetch personalized articles.");
-                return;
-            }
+                var response = await _httpClient.GetAsync("api/news/personalized");
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Unable to fetch personalized articles.");
+                    return;
+                }
 
-            var articles = await response.Content.ReadFromJsonAsync<List<NewsResponse>>();
-            foreach (var article in articles)
+                var articles = await response.Content.ReadFromJsonAsync<List<NewsResponse>>();
+                foreach (var article in articles)
+                {
+                    Console.WriteLine($"\nID         : {article.ArticleId}");
+                    Console.WriteLine($"Title      : {article.Title}");
+                    Console.WriteLine($"Source     : {article.Source}");
+                    Console.WriteLine($"URL        : {article.Url}");
+                }
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine($"\nID         : {article.ArticleId}");
-                Console.WriteLine($"Title      : {article.Title}");
-                Console.WriteLine($"Source     : {article.Source}");
-                Console.WriteLine($"URL        : {article.Url}");
+                Console.WriteLine($"Error fetching recommended articles: {ex.Message}");
             }
         }
 
         public async Task<NotificationConfigResponse> ViewNotificationConfigAsync()
         {
-            var response = await _httpClient.GetAsync("api/notifications/config");
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine("Failed to fetch config.");
+                var response = await _httpClient.GetAsync("api/notifications/config");
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Failed to fetch config.");
+                    return new NotificationConfigResponse();
+                }
+                var notificationConfig = await response.Content.ReadFromJsonAsync<NotificationConfigResponse>() ?? new NotificationConfigResponse();
+                // Display categories with their status
+                Console.WriteLine("\n--- Notification Configuration ---");
+                if (notificationConfig.Categories != null && notificationConfig.Categories.Count > 0)
+                {
+                    int categoryIndex = 1;
+                    foreach (var category in notificationConfig.Categories)
+                    {
+                        Console.WriteLine($"{categoryIndex++}. {category.CategoryName} - {(category.IsEnabled ? "Enabled" : "Disabled")}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No categories found.");
+                }
+
+                // Display keywords
+                Console.WriteLine($" Keywords");
+                if (notificationConfig.Keywords != null && notificationConfig.Keywords.Count > 0)
+                {
+                    int index = 1;
+                    foreach (var keyword in notificationConfig.Keywords)
+                    {
+                        Console.WriteLine($"{index++}. {keyword}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No keywords configured.");
+                }
+
+                return notificationConfig;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching notification config: {ex.Message}");
                 return new NotificationConfigResponse();
             }
-            var notificationConfig = await response.Content.ReadFromJsonAsync<NotificationConfigResponse>() ?? new NotificationConfigResponse();
-            // Display categories with their status
-            Console.WriteLine("\n--- Notification Configuration ---");
-            if (notificationConfig.Categories != null && notificationConfig.Categories.Count > 0)
-            {
-                int categoryIndex = 1;
-                foreach (var category in notificationConfig.Categories)
-                {
-                    Console.WriteLine($"{categoryIndex++}. {category.CategoryName} - {(category.IsEnabled ? "Enabled" : "Disabled")}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No categories found.");
-            }
-
-            // Display keywords
-            Console.WriteLine($" Keywords");
-            if (notificationConfig.Keywords != null && notificationConfig.Keywords.Count > 0)
-            {
-                int index = 1;
-                foreach (var keyword in notificationConfig.Keywords)
-                {
-                    Console.WriteLine($"{index++}. {keyword}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("No keywords configured.");
-            }
-
-            return notificationConfig;
         }
 
-        public bool IsStartDateBeforeEndDate(string startDate, string endDate)
+        private bool IsStartDateBeforeEndDate(string startDate, string endDate)
         {
             if (DateTime.TryParse(startDate, out DateTime start) && DateTime.TryParse(endDate, out DateTime end))
             {

@@ -141,7 +141,7 @@ namespace NewsAggrigation.BLL.Services.News
 
         public async Task<bool> UnhideArticleAsync(int articleId)
         {
-            var article = await _articleRepository.GetByIdAsync(articleId);
+            var article = await _articleRepository.GetDeletedByIdAsync(articleId);
             if (article == null) return false;
 
             await _articleRepository.UnhideArticleAsync(article);

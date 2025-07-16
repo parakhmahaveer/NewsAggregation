@@ -27,6 +27,13 @@ namespace NewsAggrigation.BLL.Services.Catgory
 
         public async Task<CategoryResponse> CreateCategoryAsync(string categoryName)
         {
+            var existingCategories = await _repository.GetAllAsync();
+            if (existingCategories.Any(c =>
+                string.Equals(c.CategoryName, categoryName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException($"Category '{categoryName}' already exists.");
+            }
+
             var category = new Category
             {
                 CategoryName = categoryName,

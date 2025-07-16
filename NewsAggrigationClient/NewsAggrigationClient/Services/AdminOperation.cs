@@ -273,7 +273,7 @@ namespace NewsAggrigationClient.Services
                 return;
             }
 
-            var response = await _httpClient.PostAsync($"api/news/block-keyword?keyword={Uri.EscapeDataString(keyword)}", null);
+            var response = await _httpClient.PostAsync($"api/categories/block?keyword={Uri.EscapeDataString(keyword)}", null);
 
             if (response.IsSuccessStatusCode)
             {

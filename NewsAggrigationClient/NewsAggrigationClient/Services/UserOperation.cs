@@ -272,26 +272,31 @@ namespace NewsAggrigationClient.Services
             var query = Console.ReadLine();
 
             Console.Write("Enter start date (yyyy-MM-dd): ");
-            var start = Console.ReadLine();
+            var startDate = Console.ReadLine();
 
             Console.Write("Enter end date (yyyy-MM-dd): ");
-            var end = Console.ReadLine();
+            var endDate = Console.ReadLine();
 
             Console.Write("Sort by (likes/dislikes): ");
             var sort = Console.ReadLine()?.ToLower();
 
             // Validate input
-            if (!DateTime.TryParse(start, out _) || !DateTime.TryParse(end, out _))
+            if (!DateTime.TryParse(startDate, out _) || !DateTime.TryParse(endDate, out _))
             {
                 Console.WriteLine("Invalid date format.");
+                return;
+            }
+            if (!IsStartDateBeforeEndDate(startDate, endDate))
+            {
+                Console.WriteLine("Start date must be earlier than or equal to end date.");
                 return;
             }
 
             var request = new SearchRequest
             {
                 Query = query,
-                StartDate = start,
-                EndDate = end,
+                StartDate = startDate,
+                EndDate = endDate,
                 SortBy = sort
             };
 
@@ -435,6 +440,57 @@ namespace NewsAggrigationClient.Services
                 Console.WriteLine($"Source     : {article.Source}");
                 Console.WriteLine($"URL        : {article.Url}");
             }
+        }
+
+        public async Task<NotificationConfigResponse> ViewNotificationConfigAsync()
+        {
+            var response = await _httpClient.GetAsync("api/notifications/config");
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Failed to fetch config.");
+                return new NotificationConfigResponse();
+            }
+            var notificationConfig = await response.Content.ReadFromJsonAsync<NotificationConfigResponse>() ?? new NotificationConfigResponse();
+            // Display categories with their status
+            Console.WriteLine("\n--- Notification Configuration ---");
+            if (notificationConfig.Categories != null && notificationConfig.Categories.Count > 0)
+            {
+                int categoryIndex = 1;
+                foreach (var category in notificationConfig.Categories)
+                {
+                    Console.WriteLine($"{categoryIndex++}. {category.CategoryName} - {(category.IsEnabled ? "Enabled" : "Disabled")}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No categories found.");
+            }
+
+            // Display keywords
+            Console.WriteLine($" Keywords");
+            if (notificationConfig.Keywords != null && notificationConfig.Keywords.Count > 0)
+            {
+                int index = 1;
+                foreach (var keyword in notificationConfig.Keywords)
+                {
+                    Console.WriteLine($"{index++}. {keyword}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No keywords configured.");
+            }
+
+            return notificationConfig;
+        }
+
+        public bool IsStartDateBeforeEndDate(string startDate, string endDate)
+        {
+            if (DateTime.TryParse(startDate, out DateTime start) && DateTime.TryParse(endDate, out DateTime end))
+            {
+                return start <= end;
+            }
+            return false;
         }
     }
 }

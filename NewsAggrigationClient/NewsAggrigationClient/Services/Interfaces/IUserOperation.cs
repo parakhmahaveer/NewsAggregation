@@ -23,5 +23,6 @@ namespace NewsAggrigationClient.Services.Interfaces
         Task SetCategoryNotificationAsync(string category, bool enabled);
         Task SetKeywordNotificationsAsync(List<string> keywords);
         Task ViewHeadlinesAsync(NewsByCategoryRequest request);
+        Task <NotificationConfigResponse> ViewNotificationConfigAsync();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.BLL.Services.Catgory;
 using NewsAggrigation.BLL.Services.Helper;
@@ -17,27 +18,33 @@ namespace NewsAggrigation.Controller
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
+        private readonly ILogger<CategoryController> _logger;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService, ILogger<CategoryController> logger)
         {
             _categoryService = categoryService;
+            _logger = logger;
         }
 
         [HttpGet]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> GetAllCategoriesAsync()
         {
+            _logger.LogInformation("Getting all categories.");
             try
             {
                 var categories = await _categoryService.GetAllCategoriesAsync();
+                _logger.LogInformation("Successfully retrieved categories.");
                 return Ok(categories);
             }
             catch (ApiExceptionHelper ex)
             {
+                _logger.LogWarning(ex, "API exception occurred while retrieving categories.");
                 return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to retrieve categories.");
                 return StatusCode(500, new { Message = "Failed to retrieve categories." + ex.Message });
             }
         }
@@ -45,17 +52,21 @@ namespace NewsAggrigation.Controller
         [HttpPost]
         public async Task<IActionResult> CreateCategoryAsync([FromQuery] string category)
         {
+            _logger.LogInformation("Creating category: {Category}", category);
             try
             {
                 var created = await _categoryService.CreateCategoryAsync(category);
-                return CreatedAtAction(nameof(GetCategoryByIdAsync), new { id = created.CategoryId }, created);
+                _logger.LogInformation("Category created with ID: {CategoryId}", created.CategoryId);
+                return Ok();
             }
             catch (ApiExceptionHelper ex)
             {
+                _logger.LogWarning(ex, "API exception occurred while creating category.");
                 return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to create category.");
                 return StatusCode(500, new { Message = "Failed to create category." + ex.Message });
             }
         }
@@ -63,17 +74,21 @@ namespace NewsAggrigation.Controller
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCategoryByIdAsync(int id)
         {
+            _logger.LogInformation("Getting category by ID: {CategoryId}", id);
             try
             {
                 var category = await _categoryService.GetCategoryWithKeywordsAsync(id);
+                _logger.LogInformation("Successfully retrieved category with ID: {CategoryId}", id);
                 return Ok(category);
             }
             catch (ApiExceptionHelper ex)
             {
+                _logger.LogWarning(ex, "API exception occurred while fetching category by ID: {CategoryId}", id);
                 return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to fetch category by ID: {CategoryId}", id);
                 return StatusCode(500, new { Message = "Failed to fetch category." + ex.Message });
             }
         }

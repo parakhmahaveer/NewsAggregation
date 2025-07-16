@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.BLL.Exceptions;
+using NewsAggrigation.BLL.Services.Helper;
 using NewsAggrigation.DAL.Models;
 using NewsAggrigation.DAL.Repositories.Auth;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NewsAggrigation.BLL.Services.Auth
@@ -30,15 +29,22 @@ namespace NewsAggrigation.BLL.Services.Auth
             {
                 var user = await _authRepository.GetUserByUsernameAsync(dto.Username);
                 if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                    return null;
+                {
+                    _logger.LogWarning("Unauthorized login attempt for user: {Username}", dto.Username);
+                    throw new UnauthorizedException("Invalid username or password.");
+                }
 
                 var token = _tokenService.CreateToken(user.UserId, user.Username, user.Role);
                 return new AuthResponse { Token = token, Username = user.Username, Role = user.Role };
             }
+            catch (UnauthorizedException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Login failed for user: {Username}", dto.Username);
-                throw new ApplicationException("An error occurred during login. Please try again later.");
+                throw new ApiExceptionHelper("An error occurred during login. Please try again later.", 500);
             }
         }
 
@@ -48,11 +54,11 @@ namespace NewsAggrigation.BLL.Services.Auth
             {
                 var existingUserByUsername = await _authRepository.GetUserByUsernameAsync(dto.Username);
                 if (existingUserByUsername != null)
-                    throw new ApplicationException($"Username '{dto.Username}' is already taken.");
+                    throw new ValidationException($"Username '{dto.Username}' is already taken.");
 
                 var existingUserByEmail = await _authRepository.GetUserByEmailAsync(dto.Email);
                 if (existingUserByEmail != null)
-                    throw new ApplicationException($"Email '{dto.Email}' is already registered.");
+                    throw new ValidationException($"Email '{dto.Email}' is already registered.");
 
                 var user = new User
                 {
@@ -66,15 +72,15 @@ namespace NewsAggrigation.BLL.Services.Auth
 
                 return new RegisterResponse { Username = user.Username };
             }
-            catch (ApplicationException appEx)
+            catch (ValidationException valEx)
             {
-                _logger.LogWarning(appEx, "Validation failed for registration: {Username}", dto.Username);
+                _logger.LogWarning(valEx, "Validation failed for registration: {Username}", dto.Username);
                 throw;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Registration failed for user: {Username}", dto.Username);
-                throw new ApplicationException("An error occurred during registration. Please try again later.");
+                throw new ApiExceptionHelper("An error occurred during registration. Please try again later.", 500);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NewsAggrigation.BLL.Exceptions;
 using NewsAggrigation.DAL;
 
 namespace NewsAggrigation.BLL.Services.Categorizer
@@ -15,7 +16,7 @@ namespace NewsAggrigation.BLL.Services.Categorizer
         public async Task<int?> DetectCategoryAsync(string content)
         {
             if (string.IsNullOrWhiteSpace(content))
-                return null;
+                throw new ValidationException("Content must not be empty.");
 
             var categoryKeywords = await _context.CategoryKeywords
                 .AsNoTracking()
@@ -23,7 +24,7 @@ namespace NewsAggrigation.BLL.Services.Categorizer
                 .ToListAsync();
 
             if (!categoryKeywords.Any())
-                return null;
+                throw new NotFoundException("No category keywords found in the system.");
 
             var categoryScores = new Dictionary<int, int>();
 
@@ -41,7 +42,6 @@ namespace NewsAggrigation.BLL.Services.Categorizer
                 }
             }
 
-            // If nothing matched
             if (!categoryScores.Any())
                 return null;
 

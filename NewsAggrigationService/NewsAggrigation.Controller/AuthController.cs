@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.BLL.Exceptions;
 using NewsAggrigation.BLL.Services.Auth;
 using NewsAggrigation.BLL.Services.Helper;
 
@@ -29,6 +30,16 @@ namespace NewsAggrigation.Controller
                 _logger.LogInformation("User registered successfully: {Email}", request.Email);
                 return Ok(result);
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error during registration for email: {Email}", request.Email);
+                return BadRequest(new { ex.Message });
+            }
+            catch (ConflictException ex)
+            {
+                _logger.LogWarning(ex, "Conflict error during registration for email: {Email}", request.Email);
+                return Conflict(new { ex.Message });
+            }
             catch (ApiExceptionHelper ex)
             {
                 _logger.LogWarning(ex, "API exception during registration for email: {Email}", request.Email);
@@ -48,14 +59,23 @@ namespace NewsAggrigation.Controller
             {
                 _logger.LogInformation("Attempting login for username: {Username}", request.Username);
                 var result = await _authService.LoginAsync(request);
-                if (result == null)
-                {
-                    _logger.LogWarning("Invalid login attempt for username: {Username}", request.Username);
-                    return StatusCode(401, new { Message = "Invalid email or password." });
-                }
-
                 _logger.LogInformation("User logged in successfully: {Username}", request.Username);
                 return Ok(result);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error during login for username: {Username}", request.Username);
+                return BadRequest(new { ex.Message });
+            }
+            catch (UnauthorizedException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized login attempt for username: {Username}", request.Username);
+                return Unauthorized();
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Not found during login for username: {Username}", request.Username);
+                return NotFound(new { ex.Message });
             }
             catch (ApiExceptionHelper ex)
             {

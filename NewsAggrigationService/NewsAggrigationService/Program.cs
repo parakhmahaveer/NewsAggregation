@@ -18,6 +18,7 @@ using NewsAggrigation.DAL.Repositories.Auth;
 using NewsAggrigation.DAL.Repositories.CategoryRepo;
 using NewsAggrigation.DAL.Repositories.ExternalApiRepo;
 using NewsAggrigation.DAL.Repositories.NotificationRepo;
+using NewsAggrigationService.Middleware;
 using System;
 using System.Text;
 
@@ -99,7 +100,6 @@ namespace NewsAggrigationService
             builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IUserIdentityContext, UserIdentityContext>();
-            //builder.Services.AddScoped<IExternalNewsApiClient, NewsApiClient>();
             builder.Services.AddScoped<ICategorizerService, CategorizerService>();
             builder.Services.AddScoped<ExternalNewsApiFactoryClient>();
             builder.Services.AddScoped<TokenService>();
@@ -118,6 +118,7 @@ namespace NewsAggrigationService
                 });
             }
             //app.UseHttpsRedirection();
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
 

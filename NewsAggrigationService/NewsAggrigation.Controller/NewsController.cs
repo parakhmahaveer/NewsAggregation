@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.BLL.Exceptions;
 using NewsAggrigation.BLL.Services.Helper;
 using NewsAggrigation.BLL.Services.Helper.UserIdentity;
 using NewsAggrigation.BLL.Services.News;
@@ -54,6 +55,11 @@ namespace NewsAggrigation.Controller
                 var articles = await _newsService.GetNewsByDateRangeAsync(startDate, endDate);
                 return Ok(articles);
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error while fetching news by date range.");
+                return BadRequest(new { ex.Message });
+            }
             catch (ApiExceptionHelper ex)
             {
                 _logger.LogWarning(ex, "API exception occurred while fetching news by date range.");
@@ -74,6 +80,11 @@ namespace NewsAggrigation.Controller
                 _logger.LogInformation("Fetching news by category: {Category}", request.Category);
                 var articles = await _newsService.GetTodaysNewsByCategoryAsync(request);
                 return Ok(articles);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error while fetching news by category.");
+                return BadRequest(new { ex.Message });
             }
             catch (ApiExceptionHelper ex)
             {
@@ -96,6 +107,11 @@ namespace NewsAggrigation.Controller
                 var articles = await _newsService.SearchNewsAsync(request);
                 return Ok(articles);
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error while searching news.");
+                return BadRequest(new { ex.Message });
+            }
             catch (ApiExceptionHelper ex)
             {
                 _logger.LogWarning(ex, "API exception occurred while searching news.");
@@ -117,15 +133,20 @@ namespace NewsAggrigation.Controller
                 await _newsService.SaveArticleAsync(username, articleId);
                 return Ok(new { Message = "Article saved successfully." });
             }
-            catch (ArgumentException ex)
+            catch (NotFoundException ex)
             {
-                _logger.LogWarning(ex, "Article not found while saving.");
+                _logger.LogWarning(ex, "Not found error while saving article.");
                 return NotFound(new { ex.Message });
             }
-            catch (InvalidOperationException ex)
+            catch (ConflictException ex)
             {
-                _logger.LogWarning(ex, "Article already saved.");
-                return BadRequest(new { ex.Message });
+                _logger.LogWarning(ex, "Conflict error while saving article.");
+                return Conflict(new { ex.Message });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while saving article.");
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
@@ -146,6 +167,11 @@ namespace NewsAggrigation.Controller
                     return BadRequest(new { Message = "Could not update feedback." });
 
                 return Ok(new { Message = request.IsLiked ? "Article liked." : "Article disliked." });
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error while reacting to article.");
+                return BadRequest(new { ex.Message });
             }
             catch (ApiExceptionHelper ex)
             {
@@ -168,6 +194,16 @@ namespace NewsAggrigation.Controller
                 var result = await _newsService.UnsaveArticleAsync(username, articleId);
                 return result ? NoContent() : NotFound(new { Message = "Saved article not found." });
             }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error while un-saving article.");
+                return BadRequest(new { ex.Message });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while un-saving article.");
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error occurred while un-saving article.");
@@ -183,6 +219,16 @@ namespace NewsAggrigation.Controller
                 _logger.LogInformation("Fetching saved articles for user {Username}.", username);
                 var articles = await _newsService.GetSavedArticlesAsync(username);
                 return Ok(articles);
+            }
+            catch (ValidationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error while fetching saved articles.");
+                return BadRequest(new { ex.Message });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while fetching saved articles.");
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
@@ -201,6 +247,16 @@ namespace NewsAggrigation.Controller
                 _logger.LogInformation("User {UserId} reporting article {ArticleId}.", userId, articleId);
                 await _newsService.ReportArticleAsync(articleId, userId);
                 return Ok(new { Message = "Article reported successfully." });
+            }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Not found error while reporting article.");
+                return NotFound(new { ex.Message });
+            }
+            catch (ConflictException ex)
+            {
+                _logger.LogWarning(ex, "Conflict error while reporting article.");
+                return Conflict(new { ex.Message });
             }
             catch (ApiExceptionHelper ex)
             {
@@ -224,6 +280,11 @@ namespace NewsAggrigation.Controller
                 var articles = await _newsService.GetReportedArticlesAsync();
                 return Ok(articles);
             }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while retrieving reported articles.");
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to retrieve reported articles.");
@@ -241,9 +302,19 @@ namespace NewsAggrigation.Controller
                 var success = await _newsService.HideArticleAsync(articleId);
                 return success ? Ok(new { Message = "Article hidden." }) : NotFound(new { Message = "Article not found." });
             }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Not found error while hiding article {ArticleId}.", articleId);
+                return NotFound(new { ex.Message });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while hiding article {ArticleId}.", articleId);
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to hide article.");
+                _logger.LogError(ex, "Failed to hide article {ArticleId}.", articleId);
                 return StatusCode(500, new { Message = "Failed to hide article." + ex.Message });
             }
         }
@@ -258,9 +329,19 @@ namespace NewsAggrigation.Controller
                 var success = await _newsService.UnhideArticleAsync(articleId);
                 return success ? Ok(new { Message = "Article unhidden." }) : NotFound(new { Message = "Article not found." });
             }
+            catch (NotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Not found error while unhiding article {ArticleId}.", articleId);
+                return NotFound(new { ex.Message });
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while unhiding article {ArticleId}.", articleId);
+                return StatusCode(ex.StatusCode, new { ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to unhide article.");
+                _logger.LogError(ex, "Failed to unhide article {ArticleId}.", articleId);
                 return StatusCode(500, new { Message = "Failed to unhide article." + ex.Message });
             }
         }
@@ -275,6 +356,11 @@ namespace NewsAggrigation.Controller
                 _logger.LogInformation("Fetching personalized articles for user {UserId}.", userId);
                 var articles = await _newsService.GetPersonalizedArticlesAsync(userId);
                 return Ok(articles);
+            }
+            catch (ApiExceptionHelper ex)
+            {
+                _logger.LogWarning(ex, "API exception occurred while fetching personalized articles.");
+                return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {

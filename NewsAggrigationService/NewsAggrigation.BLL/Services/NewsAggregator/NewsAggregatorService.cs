@@ -42,6 +42,10 @@ namespace NewsAggrigation.BLL.Services.NewsAggregator
                             var detectedCategoryId = await _categorizerService.DetectCategoryAsync($"{article.Title} {article.Content}");
                             article.CategoryId = (int)(detectedCategoryId == null ? 11 : detectedCategoryId);
                             _context.Articles.Add(article);
+                            if(article.Content == null)
+                            {
+                                article.Content = article.Title;
+                            }
                             await _context.SaveChangesAsync();
 
                             await NotifySubscribedUsersAsync(article);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.BLL.Exceptions;
 using NewsAggrigation.BLL.Services.ExternalApi;
 using NewsAggrigation.BLL.Services.Helper;
 
@@ -26,13 +27,17 @@ namespace NewsAggrigation.Controller
                 var apis = await _externalApiService.GetAllAsync();
                 return Ok(apis);
             }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized();
+            }
             catch (ApiExceptionHelper ex)
             {
                 return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An unexpected error occurred while retrieving APIs." + ex.Message });
+                return StatusCode(500, new { Message = "An unexpected error occurred while retrieving APIs. " + ex.Message });
             }
         }
 
@@ -42,7 +47,15 @@ namespace NewsAggrigation.Controller
             try
             {
                 var api = await _externalApiService.GetByIdAsync(apiId);
-                return api != null ? Ok(api) : NotFound(new { Message = "External API not found." });
+                return Ok(api);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { ex.Message });
             }
             catch (ApiExceptionHelper ex)
             {
@@ -50,25 +63,7 @@ namespace NewsAggrigation.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An unexpected error occurred while retrieving the API." + ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddExternalApiAsync([FromBody] ExternalApiRequest request)
-        {
-            try
-            {
-                var createdApi = await _externalApiService.AddAsync(request);
-                return CreatedAtAction(nameof(GetExternalApiByIdAsync), new { apiId = createdApi.Id }, createdApi);
-            }
-            catch (ApiExceptionHelper ex)
-            {
-                return StatusCode(ex.StatusCode, new { ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "An error occurred while adding the external API." + ex.Message });
+                return StatusCode(500, new { Message = "An unexpected error occurred while retrieving the API. " + ex.Message });
             }
         }
 
@@ -78,7 +73,11 @@ namespace NewsAggrigation.Controller
             try
             {
                 var updatedApi = await _externalApiService.UpdateExternalApiAsync(request);
-                return updatedApi != null ? Ok(updatedApi) : NotFound(new { Message = "External API not found." });
+                return Ok(updatedApi);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { ex.Message });
             }
             catch (ApiExceptionHelper ex)
             {
@@ -86,7 +85,7 @@ namespace NewsAggrigation.Controller
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while updating the external API." + ex.Message });
+                return StatusCode(500, new { Message = "An error occurred while updating the external API. " + ex.Message });
             }
         }
 
@@ -98,13 +97,17 @@ namespace NewsAggrigation.Controller
                 var isDeleted = await _externalApiService.DeleteAsync(apiId);
                 return isDeleted ? NoContent() : NotFound(new { Message = "External API not found." });
             }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { ex.Message });
+            }
             catch (ApiExceptionHelper ex)
             {
                 return StatusCode(ex.StatusCode, new { ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while deleting the external API." + ex.Message });
+                return StatusCode(500, new { Message = "An error occurred while deleting the external API. " + ex.Message });
             }
         }
     }

@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.BLL.Exceptions;
 using NewsAggrigation.DAL.Models;
 using NewsAggrigation.DAL.Repositories.ArticleRepo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NewsAggrigation.BLL.Services.News
@@ -17,7 +17,7 @@ namespace NewsAggrigation.BLL.Services.News
         private readonly IArticleRepository _articleRepository;
         private readonly IConfiguration _configuration;
 
-        public NewsService (IArticleRepository articleRepository, IConfiguration configuration)
+        public NewsService(IArticleRepository articleRepository, IConfiguration configuration)
         {
             _articleRepository = articleRepository;
             _configuration = configuration;
@@ -25,83 +25,87 @@ namespace NewsAggrigation.BLL.Services.News
 
         public async Task<List<NewsResponse>> GetTodaysNewsAsync()
         {
-            try
-            {
-                var todayStartTime = DateTime.Now.Date;
-                var todayEndTime = DateTime.Now.Date.Add(TimeSpan.FromDays(1));
-                return await _articleRepository.GetArticlesByDateRangeAsync(todayStartTime, todayEndTime);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to get today's news.", ex);
-            }
+            var todayStartTime = DateTime.Now.Date;
+            var todayEndTime = DateTime.Now.Date.Add(TimeSpan.FromDays(1));
+            return await _articleRepository.GetArticlesByDateRangeAsync(todayStartTime, todayEndTime);
         }
 
         public async Task<List<NewsResponse>> GetNewsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            try
-            {
-                return await _articleRepository.GetArticlesByDateRangeAsync(startDate.Date, endDate.Date);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to get news by date range.", ex);
-            }
+            if (startDate > endDate)
+                throw new ValidationException("Start date must be before end date.");
+
+            return await _articleRepository.GetArticlesByDateRangeAsync(startDate.Date, endDate.Date);
         }
 
         public async Task<List<NewsResponse>> GetTodaysNewsByCategoryAsync(NewsByCategoryRequest request)
         {
-            try
-            {
-                return await _articleRepository.GetArticlesByCategoryAndDateAsync(request);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to get today's news by category.", ex);
-            }
+            if (request == null)
+                throw new ValidationException("Request cannot be null.");
+
+            return await _articleRepository.GetArticlesByCategoryAndDateAsync(request);
         }
 
         public async Task<List<NewsResponse>> SearchNewsAsync(SearchRequest request)
         {
-            try
-            {
-                return await _articleRepository.SearchArticlesAsync(request);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Failed to search news.", ex);
-            }
+            if (request == null)
+                throw new ValidationException("Request cannot be null.");
+
+            return await _articleRepository.SearchArticlesAsync(request);
         }
 
         public async Task SaveArticleAsync(string username, int articleId)
         {
-            await _articleRepository.SaveArticleAsync(username, articleId);
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ValidationException("Username must not be empty.");
+
+            try
+            {
+                await _articleRepository.SaveArticleAsync(username, articleId);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new NotFoundException(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new ConflictException(ex.Message);
+            }
         }
 
         public async Task<bool> UnsaveArticleAsync(string username, int articleId)
         {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ValidationException("Username must not be empty.");
+
             return await _articleRepository.DeleteSavedArticleAsync(username, articleId);
         }
 
         public async Task<List<NewsResponse>> GetSavedArticlesAsync(string username)
         {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ValidationException("Username must not be empty.");
+
             return await _articleRepository.GetSavedArticlesByUserIdAsync(username);
         }
 
         public async Task<bool> SetArticleReactionAsync(ArticleReactionRequest request)
         {
+            if (request == null)
+                throw new ValidationException("Request cannot be null.");
+
             return await _articleRepository.SetArticleReactionByArticleIdAsync(request);
         }
 
         public async Task ReportArticleAsync(int articleId, int userId)
         {
             var article = await _articleRepository.GetByIdAsync(articleId)
-                    ?? throw new ArgumentException("Article not found");
+                    ?? throw new NotFoundException("Article not found.");
 
             var alreadyReported = await _articleRepository.HasUserReportedAsync(articleId, userId);
             if (alreadyReported)
             {
-                throw new InvalidOperationException("You’ve already reported this article.");
+                throw new ConflictException("You’ve already reported this article.");
             }
 
             await _articleRepository.ReportArticleAsync(articleId, userId);
@@ -133,7 +137,8 @@ namespace NewsAggrigation.BLL.Services.News
         public async Task<bool> HideArticleAsync(int articleId)
         {
             var article = await _articleRepository.GetByIdAsync(articleId);
-            if (article == null) return false;
+            if (article == null)
+                throw new NotFoundException($"Article with ID {articleId} not found.");
 
             await _articleRepository.HideArticleAsync(article);
             return true;
@@ -142,7 +147,8 @@ namespace NewsAggrigation.BLL.Services.News
         public async Task<bool> UnhideArticleAsync(int articleId)
         {
             var article = await _articleRepository.GetDeletedByIdAsync(articleId);
-            if (article == null) return false;
+            if (article == null)
+                throw new NotFoundException($"Article with ID {articleId} not found.");
 
             await _articleRepository.UnhideArticleAsync(article);
             return true;

@@ -1,14 +1,10 @@
-﻿using Azure.Core;
-using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.BLL.Exceptions;
+using NewsAggrigation.BLL.Services.Helper;
 using NewsAggrigation.DAL.Models;
 using NewsAggrigation.DAL.Repositories.ExternalApiRepo;
-using SendGrid.Helpers.Errors.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NewsAggrigation.BLL.Services.ExternalApi
 {
@@ -23,14 +19,34 @@ namespace NewsAggrigation.BLL.Services.ExternalApi
 
         public async Task<IEnumerable<ExternalApiResponse>> GetAllAsync()
         {
-            var configs = await _repository.GetAllAsync();
-            return configs.Select(MapToResponse);
+            try
+            {
+                var configs = await _repository.GetAllAsync();
+                return configs.Select(MapToResponse);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiExceptionHelper("Failed to retrieve external API configs.", 500);
+            }
         }
 
         public async Task<ExternalApiResponse> GetByIdAsync(int id)
         {
-            var config = await _repository.GetByIdAsync(id);
-            return config is null ? null : MapToResponse(config);
+            try
+            {
+                var config = await _repository.GetByIdAsync(id);
+                if (config is null)
+                    throw new NotFoundException($"Config with ID {id} not found.");
+                return MapToResponse(config);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiExceptionHelper("Failed to retrieve external API config.", 500);
+            }
         }
 
         public async Task<ExternalApiResponse> AddAsync(ExternalApiRequest request)

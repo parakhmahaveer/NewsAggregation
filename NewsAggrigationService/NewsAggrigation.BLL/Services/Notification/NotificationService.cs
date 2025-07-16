@@ -73,7 +73,7 @@ namespace NewsAggrigation.BLL.Services.Notification
                 {
                     UserId = request.UserId,
                     Word = k,
-                    IsEnabled = request.IsEnabled,
+                    IsEnabled = true,
                     IsDeleted = false
                 });
 

@@ -1,12 +1,11 @@
 ﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
 using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.BLL.Exceptions;
 using NewsAggrigation.DAL.Models;
 using NewsAggrigation.DAL.Repositories.CategoryRepo;
-using SendGrid.Helpers.Errors.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NewsAggrigation.BLL.Services.Catgory
@@ -27,11 +26,14 @@ namespace NewsAggrigation.BLL.Services.Catgory
 
         public async Task<CategoryResponse> CreateCategoryAsync(string categoryName)
         {
+            if (string.IsNullOrWhiteSpace(categoryName))
+                throw new ValidationException("Category name must not be empty.");
+
             var existingCategories = await _repository.GetAllAsync();
             if (existingCategories.Any(c =>
                 string.Equals(c.CategoryName, categoryName, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new InvalidOperationException($"Category '{categoryName}' already exists.");
+                throw new ConflictException($"Category '{categoryName}' already exists.");
             }
 
             var category = new Category
@@ -70,9 +72,15 @@ namespace NewsAggrigation.BLL.Services.Catgory
             var category = await _repository.GetCategoryByIdAsync(categoryId)
                 ?? throw new NotFoundException($"Category with ID {categoryId} not found.");
 
+            if (string.IsNullOrWhiteSpace(request.CommaSeparatedKeywords))
+                throw new ValidationException("Keywords must not be empty.");
+
             var keywords = request.CommaSeparatedKeywords
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Where(k => !string.IsNullOrWhiteSpace(k));
+
+            if (!keywords.Any())
+                throw new ValidationException("No valid keywords provided.");
 
             await _repository.AddKeywordsAsync(categoryId, keywords);
         }
@@ -94,7 +102,8 @@ namespace NewsAggrigation.BLL.Services.Catgory
         public async Task<bool> HideCategoryAsync(int categoryId)
         {
             var category = await _repository.GetByIdAsync(categoryId);
-            if (category == null) return false;
+            if (category == null)
+                throw new NotFoundException($"Category with ID {categoryId} not found.");
 
             await _repository.HideCategoryAsync(category);
             return true;
@@ -103,7 +112,8 @@ namespace NewsAggrigation.BLL.Services.Catgory
         public async Task<bool> UnhideCategoryAsync(int categoryId)
         {
             var category = await _repository.GetByIdAsync(categoryId);
-            if (category == null) return false;
+            if (category == null)
+                throw new NotFoundException($"Category with ID {categoryId} not found.");
 
             await _repository.UnhideCategoryAsync(category);
             return true;
@@ -111,6 +121,9 @@ namespace NewsAggrigation.BLL.Services.Catgory
 
         public async Task<int> BlockArticlesByKeywordAsync(string keyword)
         {
+            if (string.IsNullOrWhiteSpace(keyword))
+                throw new ValidationException("Keyword must not be empty.");
+
             return await _repository.BlockArticlesByKeywordAsync(keyword);
         }
     }

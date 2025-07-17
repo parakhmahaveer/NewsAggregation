@@ -105,7 +105,8 @@ namespace NewsAggrigationClient.Views
                         }
                         if (!IsStartDateBeforeEndDate(startDate, endDate))
                         {
-                            Console.WriteLine("Start date must be earlier than or equal to end date.");
+                            Console.WriteLine("Start date must be earlier than end date.");
+                            Console.ReadLine();
                             return;
                         }
                         await ShowHeadlinesByCategoryMenuAsync(startDate, endDate);

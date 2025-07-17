@@ -4,6 +4,7 @@ using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
 using NewsAggrigation.DAL.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +29,9 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
                     Content = a.Content,
                     Source = a.Source,
                     Url = a.Url,
-                    Category = a.Category.CategoryName
+                    Category = a.Category.CategoryName,
+                    LikeCount = a.LikeCount,
+                    DislikeCount = a.DisLikeCount
                 })
                 .ToListAsync();
         }
@@ -55,7 +58,9 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
                     Url = a.Url,
                     Content = a.Content,
                     Source = a.Source,
-                    Category = a.Category.CategoryName
+                    Category = a.Category.CategoryName,
+                    LikeCount = a.LikeCount,
+                    DislikeCount = a.DisLikeCount
                 })
                 .ToListAsync();
         }
@@ -159,15 +164,27 @@ namespace NewsAggrigation.DAL.Repositories.ArticleRepo
                 {
                     if (request.IsLiked)
                     {
-                        userActivity.IsLiked = true;
-                        userActivity.IsDisliked = false;
-                        article.LikeCount++;
+                        if (userActivity.IsDisliked)
+                        {
+                            if (article.DisLikeCount > 0)
+                                article.DisLikeCount--;
+
+                            userActivity.IsLiked = true;
+                            userActivity.IsDisliked = false;
+                            article.LikeCount++;
+                        }
                     }
                     else
                     {
-                        userActivity.IsDisliked = true;
-                        userActivity.IsLiked = false;
-                        article.DisLikeCount++;
+                        if (userActivity.IsLiked)
+                        {
+                            if (article.LikeCount > 0)
+                                article.LikeCount--;
+
+                            userActivity.IsDisliked = true;
+                            userActivity.IsLiked = false;
+                            article.DisLikeCount++;
+                        }
                     }
                 }
                 else

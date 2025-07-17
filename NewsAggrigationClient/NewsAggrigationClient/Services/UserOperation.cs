@@ -50,6 +50,7 @@ namespace NewsAggrigationClient.Services
                     Console.WriteLine($"Source     : {article.Source}");
                     Console.WriteLine($"URL        : {article.Url}");
                     Console.WriteLine($"Category   : {article.Category}");
+                    Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
                 }
             }
             catch (Exception ex)
@@ -223,6 +224,7 @@ namespace NewsAggrigationClient.Services
                     Console.WriteLine($"Source     : {article.Source}");
                     Console.WriteLine($"URL        : {article.Url}");
                     Console.WriteLine($"Category   : {article.Category}");
+                    Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
                 }
             }
             catch (Exception ex)
@@ -350,8 +352,8 @@ namespace NewsAggrigationClient.Services
                     Console.WriteLine($"Title      : {article.Title}");
                     Console.WriteLine($"Source     : {article.Source}");
                     Console.WriteLine($"URL        : {article.Url}");
-                    Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
                     Console.WriteLine($"Category   : {article.Category}");
+                    Console.WriteLine($"Likes      : {article.LikeCount} | Dislikes: {article.DislikeCount}");
                 }
             }
             catch (Exception ex)

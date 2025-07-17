@@ -75,11 +75,10 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
                 .ToListAsync();
         }
 
-        public async Task<List<string>> GetUserKeywordNotificationPreferencesAsync(int userId)
+        public async Task<List<Keyword>> GetUserKeywordNotificationPreferencesAsync(int userId)
         {
             return await _context.Keywords
                 .Where(k => k.UserId == userId && !k.IsDeleted)
-                .Select(k => k.Word)
                 .ToListAsync();
         }
 
@@ -93,6 +92,11 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
             }
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task UpdateUserKeywordSettingsAsync(List<Keyword> settings)
+        {
+            _context.Keywords.UpdateRange(settings);
         }
     }
 }

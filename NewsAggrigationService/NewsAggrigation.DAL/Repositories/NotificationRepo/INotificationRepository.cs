@@ -14,7 +14,8 @@ namespace NewsAggrigation.DAL.Repositories.NotificationRepo
         Task RemoveKeywordsAsync(IEnumerable<Keyword> keywords);
         Task SaveChangesAsync();
         Task<List<string>> GetUserCategoryNotificationPreferencesAsync(int userId);
-        Task<List<string>> GetUserKeywordNotificationPreferencesAsync(int userId);
+        Task<List<Keyword>> GetUserKeywordNotificationPreferencesAsync(int userId);
         Task<bool> HideNotificationAsync(List<Notification> notifications);
+        Task UpdateUserKeywordSettingsAsync(List<Keyword> keywords);
     }
 }

@@ -533,14 +533,12 @@ namespace NewsAggrigationClient.Services
                     Console.WriteLine("No categories found.");
                 }
 
-                // Display keywords
-                Console.WriteLine($" Keywords");
                 if (notificationConfig.Keywords != null && notificationConfig.Keywords.Count > 0)
                 {
                     int index = 1;
                     foreach (var keyword in notificationConfig.Keywords)
                     {
-                        Console.WriteLine($"{index++}. {keyword}");
+                        Console.WriteLine($"\t{index++}. {keyword}");
                     }
                 }
                 else

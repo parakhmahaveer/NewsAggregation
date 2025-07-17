@@ -40,6 +40,19 @@ namespace NewsAggrigation.BLL.Services.Notification
         {
             foreach (var pair in request.CategorySettings)
             {
+                if(string.Equals(pair.Key, "keywords", StringComparison.OrdinalIgnoreCase))
+                {
+                    var existingKeywords = await _notificationRepo.GetUserKeywordsAsync(request.UserId);
+                    if (existingKeywords == null) continue;
+
+                    foreach (var keyword in existingKeywords)
+                    {
+                        keyword.IsEnabled = pair.Value;
+                    }
+
+                    await _notificationRepo.UpdateUserKeywordSettingsAsync(existingKeywords);
+                    continue;
+                }
                 var category = await _notificationRepo.GetCategoryByNameAsync(pair.Key);
                 if (category == null) continue;
 
@@ -66,18 +79,39 @@ namespace NewsAggrigation.BLL.Services.Notification
         public async Task ConfigureKeywordNotificationAsync(ConfigureKeywordNotificationRequest request)
         {
             var existingKeywords = await _notificationRepo.GetUserKeywordsAsync(request.UserId);
-            await _notificationRepo.RemoveKeywordsAsync(existingKeywords);
+            var existingDict = existingKeywords
+                .ToDictionary(k => k.Word, StringComparer.OrdinalIgnoreCase);
 
-            var newKeywords = request.Keywords.Distinct(StringComparer.OrdinalIgnoreCase)
-                .Select(k => new Keyword
+            var inputKeywords = request.Keywords.Distinct(StringComparer.OrdinalIgnoreCase);
+
+            var newKeywordEntities = new List<Keyword>();
+
+            foreach (var word in inputKeywords)
+            {
+                if (existingDict.TryGetValue(word, out var existingKeyword))
                 {
-                    UserId = request.UserId,
-                    Word = k,
-                    IsEnabled = true,
-                    IsDeleted = false
-                });
+                    // If keyword exists but is disabled 
+                    if (!existingKeyword.IsEnabled)
+                    {
+                        existingKeyword.IsEnabled = true;
+                        existingKeyword.IsDeleted = false;
+                    }
+                }
+                else
+                {
+                    newKeywordEntities.Add(new Keyword
+                    {
+                        UserId = request.UserId,
+                        Word = word,
+                        IsEnabled = true,
+                        IsDeleted = false
+                    });
+                }
+            }
 
-            await _notificationRepo.AddKeywordsAsync(newKeywords);
+            if (newKeywordEntities.Any())
+                await _notificationRepo.AddKeywordsAsync(newKeywordEntities);
+
             await _notificationRepo.SaveChangesAsync();
         }
 
@@ -93,11 +127,17 @@ namespace NewsAggrigation.BLL.Services.Notification
             }).ToList();
 
             var keywordConfig = await _notificationRepo.GetUserKeywordNotificationPreferencesAsync(userId);
+            var keywordCategory = new CategoryStatusDto
+            {
+                CategoryName = "Keywords",
+                IsEnabled = keywordConfig.Any(k => k.IsEnabled)
+            };
 
+            categoryStatus.Add(keywordCategory);
             return new NotificationConfigResponse
             {
                 Categories = categoryStatus,
-                Keywords = keywordConfig
+                Keywords = keywordConfig.Select(k => k.Word).ToList()
             };
         }
     }

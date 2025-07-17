@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace NewsAggrigationClient.Configuration
     public static class HttpClientFactory
     {
         private static HttpClient _client;
+        private static string _currentToken;
 
         public static HttpClient CreateClient(string token = null)
         {
@@ -20,13 +22,23 @@ namespace NewsAggrigationClient.Configuration
                 };
             }
 
-            if (!string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(token) && token != _currentToken)
             {
+                _currentToken = token;
                 _client.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    new AuthenticationHeaderValue("Bearer", _currentToken);
             }
 
             return _client;
         }
+
+        public static void UpdateToken(string token)
+        {
+            _currentToken = token;
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", _currentToken);
+        }
+
+        public static string GetToken() => _currentToken;
     }
 }

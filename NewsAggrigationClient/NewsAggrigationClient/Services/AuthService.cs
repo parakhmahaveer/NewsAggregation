@@ -1,4 +1,5 @@
-﻿using NewsAggrigationClient.Models.DTOs.RequestDTOs;
+﻿using NewsAggrigationClient.Configuration;
+using NewsAggrigationClient.Models.DTOs.RequestDTOs;
 using NewsAggrigationClient.Models.DTOs.ResponseDTOs;
 using NewsAggrigationClient.Services.Interfaces;
 using System;
@@ -60,6 +61,11 @@ namespace NewsAggrigationClient.Services
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                SessionContext.JwtToken = token?.Token;
+                SessionContext.Username = token?.Username;
+                SessionContext.Role = token?.Role;
+
+                HttpClientFactory.UpdateToken(token?.Token);
                 Console.WriteLine($"Login successful. Welcome, {token.Username} ({token.Role})");
                 return token;
             }

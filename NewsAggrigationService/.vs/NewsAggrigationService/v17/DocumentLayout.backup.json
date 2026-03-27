@@ -1,0 +1,194 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AD24CA10-642E-42EE-9479-5395E61E867F}|NewsAggrigation.BLL\\NewsAggrigation.BLL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.bll\\services\\notification\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD24CA10-642E-42EE-9479-5395E61E867F}|NewsAggrigation.BLL\\NewsAggrigation.BLL.csproj|solutionrelative:newsaggrigation.bll\\services\\notification\\notificationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.dal\\repositories\\notificationrepo\\notificationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|solutionrelative:newsaggrigation.dal\\repositories\\notificationrepo\\notificationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.dal\\repositories\\notificationrepo\\inotificationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|solutionrelative:newsaggrigation.dal\\repositories\\notificationrepo\\inotificationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A5B7DF4-B791-4973-8382-AA75E25409DE}|NewsAggrigation.Controller\\NewsAggrigation.Controller.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.controller\\notificationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A5B7DF4-B791-4973-8382-AA75E25409DE}|NewsAggrigation.Controller\\NewsAggrigation.Controller.csproj|solutionrelative:newsaggrigation.controller\\notificationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A5B7DF4-B791-4973-8382-AA75E25409DE}|NewsAggrigation.Controller\\NewsAggrigation.Controller.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.controller\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A5B7DF4-B791-4973-8382-AA75E25409DE}|NewsAggrigation.Controller\\NewsAggrigation.Controller.csproj|solutionrelative:newsaggrigation.controller\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.dal\\repositories\\articlerepo\\articlerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|solutionrelative:newsaggrigation.dal\\repositories\\articlerepo\\articlerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDBCF019-EC08-4B98-9F07-CDA8D59FC22B}|NewsAggrigationService\\NewsAggrigationService.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EDBCF019-EC08-4B98-9F07-CDA8D59FC22B}|NewsAggrigationService\\NewsAggrigationService.csproj|solutionrelative:newsaggrigationservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.dal\\models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0BC90901-EA38-4F79-AB59-15A029C8D25B}|NewsAggrigation.DAL\\NewsAggrigation.DAL.csproj|solutionrelative:newsaggrigation.dal\\models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD24CA10-642E-42EE-9479-5395E61E867F}|NewsAggrigation.BLL\\NewsAggrigation.BLL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.bll\\exceptions\\validationexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD24CA10-642E-42EE-9479-5395E61E867F}|NewsAggrigation.BLL\\NewsAggrigation.BLL.csproj|solutionrelative:newsaggrigation.bll\\exceptions\\validationexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AD24CA10-642E-42EE-9479-5395E61E867F}|NewsAggrigation.BLL\\NewsAggrigation.BLL.csproj|d:\\newsaggrigation\\newsaggregation\\newsaggrigationservice\\newsaggrigation.bll\\exceptions\\unauthorizedexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AD24CA10-642E-42EE-9479-5395E61E867F}|NewsAggrigation.BLL\\NewsAggrigation.BLL.csproj|solutionrelative:newsaggrigation.bll\\exceptions\\unauthorizedexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "NotificationRepository.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Repositories\\NotificationRepo\\NotificationRepository.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.DAL\\Repositories\\NotificationRepo\\NotificationRepository.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Repositories\\NotificationRepo\\NotificationRepository.cs",
+              "RelativeToolTip": "NewsAggrigation.DAL\\Repositories\\NotificationRepo\\NotificationRepository.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAAAAIwGMAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-17T01:32:23.663Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "INotificationRepository.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Repositories\\NotificationRepo\\INotificationRepository.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.DAL\\Repositories\\NotificationRepo\\INotificationRepository.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Repositories\\NotificationRepo\\INotificationRepository.cs",
+              "RelativeToolTip": "NewsAggrigation.DAL\\Repositories\\NotificationRepo\\INotificationRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-17T01:31:41.705Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NotificationService.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.BLL\\Services\\Notification\\NotificationService.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.BLL\\Services\\Notification\\NotificationService.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.BLL\\Services\\Notification\\NotificationService.cs",
+              "RelativeToolTip": "NewsAggrigation.BLL\\Services\\Notification\\NotificationService.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAIwDIAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-17T01:06:47.837Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "NotificationController.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.Controller\\NotificationController.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.Controller\\NotificationController.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.Controller\\NotificationController.cs",
+              "RelativeToolTip": "NewsAggrigation.Controller\\NotificationController.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAAACUAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-17T00:57:58.859Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.Controller\\CategoryController.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.Controller\\CategoryController.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.Controller\\CategoryController.cs",
+              "RelativeToolTip": "NewsAggrigation.Controller\\CategoryController.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-17T00:57:53.356Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ArticleRepository.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Repositories\\ArticleRepo\\ArticleRepository.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.DAL\\Repositories\\ArticleRepo\\ArticleRepository.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Repositories\\ArticleRepo\\ArticleRepository.cs",
+              "RelativeToolTip": "NewsAggrigation.DAL\\Repositories\\ArticleRepo\\ArticleRepository.cs",
+              "ViewState": "AgIAAFcBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-17T00:57:38.821Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigationService\\Program.cs",
+              "RelativeDocumentMoniker": "NewsAggrigationService\\Program.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigationService\\Program.cs",
+              "RelativeToolTip": "NewsAggrigationService\\Program.cs",
+              "ViewState": "AgIAAH8AAAAAAAAAAAAAwGYAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-16T21:41:22.589Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Article.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Models\\Article.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.DAL\\Models\\Article.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.DAL\\Models\\Article.cs",
+              "RelativeToolTip": "NewsAggrigation.DAL\\Models\\Article.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-16T22:23:12.373Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "UnauthorizedException.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.BLL\\Exceptions\\UnauthorizedException.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.BLL\\Exceptions\\UnauthorizedException.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.BLL\\Exceptions\\UnauthorizedException.cs",
+              "RelativeToolTip": "NewsAggrigation.BLL\\Exceptions\\UnauthorizedException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-16T20:44:20.137Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ValidationException.cs",
+              "DocumentMoniker": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.BLL\\Exceptions\\ValidationException.cs",
+              "RelativeDocumentMoniker": "NewsAggrigation.BLL\\Exceptions\\ValidationException.cs",
+              "ToolTip": "D:\\NewsAggrigation\\NewsAggregation\\NewsAggrigationService\\NewsAggrigation.BLL\\Exceptions\\ValidationException.cs",
+              "RelativeToolTip": "NewsAggrigation.BLL\\Exceptions\\ValidationException.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-16T21:48:12.809Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

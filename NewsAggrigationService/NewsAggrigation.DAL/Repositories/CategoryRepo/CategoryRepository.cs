@@ -1,0 +1,164 @@
+﻿using Microsoft.EntityFrameworkCore;
+using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.DAL.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NewsAggrigation.DAL.Repositories.CategoryRepo
+{
+    public class CategoryRepository : ICategoryRepository
+    {
+        private readonly NewsAggregatorDbContext _context;
+
+        public CategoryRepository(NewsAggregatorDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<GetCategoriesResponse>> GetAllAsync()
+        {
+            return await _context.Categories
+                .Where(c => !c.IsDeleted)
+                .Select(c => new GetCategoriesResponse
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName
+                })
+                .ToListAsync();
+        }
+
+        public async Task<Category> AddCategoryAsync(Category category)
+        {
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
+            return category;
+        }
+
+        public async Task<Category?> GetCategoryByIdAsync(int id)
+        {
+            return await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id && !c.IsDeleted);
+        }
+
+        public async Task<bool> DeleteCategoryAsync(int id)
+        {
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null || category.IsDeleted) return false;
+
+            category.IsDeleted = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task AddKeywordsAsync(int categoryId, IEnumerable<string> keywords)
+        {
+            var keywordEntities = keywords.Select(k => new CategoryKeyword
+            {
+                CategoryId = categoryId,
+                KeywordName = k.Trim(),
+                IsDeleted = false
+            });
+
+            await _context.CategoryKeywords.AddRangeAsync(keywordEntities);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteKeywordAsync(int keywordId)
+        {
+            var keyword = await _context.Keywords.FindAsync(keywordId);
+            if (keyword == null || keyword.IsDeleted) return false;
+
+            keyword.IsDeleted = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<CategoryKeyword>> GetKeywordsByCategoryIdAsync(int categoryId)
+        {
+            return await _context.CategoryKeywords
+                .Where(k => k.CategoryId == categoryId && !k.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<Category?> GetByIdAsync(int categoryId)
+        {
+            return await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.CategoryId == categoryId);
+        }
+
+        public async Task HideCategoryAsync(Category category)
+        {
+            category.IsDeleted = true;
+            await HideCategoryKeywordsAsync(category.CategoryId);
+
+            var relatedArticles = await _context.Articles
+                .Where(a => a.CategoryId == category.CategoryId)
+                .ToListAsync();
+
+            foreach (var article in relatedArticles)
+            {
+                article.IsDeleted = true;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UnhideCategoryAsync(Category category)
+        {
+            category.IsDeleted = false;
+            await UnhideCategoryKeywordsAsync(category.CategoryId);
+
+            var relatedArticles = await _context.Articles
+                .IgnoreQueryFilters()
+                .Where(a => a.CategoryId == category.CategoryId)
+                .ToListAsync();
+
+            foreach (var article in relatedArticles)
+                article.IsDeleted = false;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> BlockArticlesByKeywordAsync(string keyword)
+        {
+            var articlesToBlock = await _context.Articles.Where(a => a.Content.ToLower().Contains(keyword.ToLower())).ToListAsync();
+
+            foreach (var article in articlesToBlock)
+            {
+                article.IsDeleted = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return articlesToBlock.Count;
+        }
+
+        private async Task HideCategoryKeywordsAsync(int categoryId)
+        {
+            var categoryKeywords = await _context.CategoryKeywords
+                .Where(ck => ck.CategoryId == categoryId && !ck.IsDeleted)
+                .ToListAsync();
+
+            foreach (var ck in categoryKeywords)
+                ck.IsDeleted = true;
+
+            _context.CategoryKeywords.UpdateRange(categoryKeywords);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UnhideCategoryKeywordsAsync(int categoryId)
+        {
+            var categoryKeywords = await _context.CategoryKeywords
+                .IgnoreQueryFilters()
+                .Where(ck => ck.CategoryId == categoryId && ck.IsDeleted)
+                .ToListAsync();
+
+            foreach (var ck in categoryKeywords)
+                ck.IsDeleted = false;
+
+            _context.CategoryKeywords.UpdateRange(categoryKeywords);
+            await _context.SaveChangesAsync();
+        }
+    }
+}

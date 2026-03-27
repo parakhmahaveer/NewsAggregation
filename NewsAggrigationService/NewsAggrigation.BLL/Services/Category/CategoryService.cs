@@ -1,0 +1,130 @@
+﻿using NewsAggrigation.API.ServiceDTOs.RequestDTOs;
+using NewsAggrigation.API.ServiceDTOs.ResponseDTOs;
+using NewsAggrigation.BLL.Exceptions;
+using NewsAggrigation.DAL.Models;
+using NewsAggrigation.DAL.Repositories.CategoryRepo;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace NewsAggrigation.BLL.Services.Catgory
+{
+    public class CategoryService : ICategoryService
+    {
+        private readonly ICategoryRepository _repository;
+
+        public CategoryService(ICategoryRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task<IEnumerable<GetCategoriesResponse>> GetAllCategoriesAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<CategoryResponse> CreateCategoryAsync(string categoryName)
+        {
+            if (string.IsNullOrWhiteSpace(categoryName))
+                throw new ValidationException("Category name must not be empty.");
+
+            var existingCategories = await _repository.GetAllAsync();
+            if (existingCategories.Any(c =>
+                string.Equals(c.CategoryName, categoryName, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ConflictException($"Category '{categoryName}' already exists.");
+            }
+
+            var category = new Category
+            {
+                CategoryName = categoryName,
+                IsDeleted = false
+            };
+
+            var saved = await _repository.AddCategoryAsync(category);
+
+            return new CategoryResponse
+            {
+                CategoryId = saved.CategoryId,
+                CategoryName = saved.CategoryName,
+                Keywords = new List<string>()
+            };
+        }
+
+        public async Task<CategoryResponse> GetCategoryWithKeywordsAsync(int categoryId)
+        {
+            var category = await _repository.GetCategoryByIdAsync(categoryId)
+                ?? throw new NotFoundException($"Category with ID {categoryId} not found.");
+
+            var keywords = await _repository.GetKeywordsByCategoryIdAsync(categoryId);
+
+            return new CategoryResponse
+            {
+                CategoryId = category.CategoryId,
+                CategoryName = category.CategoryName,
+                Keywords = keywords.Select(k => k.KeywordName).ToList()
+            };
+        }
+
+        public async Task AddKeywordsAsync(int categoryId, CreateKeywordRequest request)
+        {
+            var category = await _repository.GetCategoryByIdAsync(categoryId)
+                ?? throw new NotFoundException($"Category with ID {categoryId} not found.");
+
+            if (string.IsNullOrWhiteSpace(request.CommaSeparatedKeywords))
+                throw new ValidationException("Keywords must not be empty.");
+
+            var keywords = request.CommaSeparatedKeywords
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(k => !string.IsNullOrWhiteSpace(k));
+
+            if (!keywords.Any())
+                throw new ValidationException("No valid keywords provided.");
+
+            await _repository.AddKeywordsAsync(categoryId, keywords);
+        }
+
+        public async Task DeleteCategoryAsync(int categoryId)
+        {
+            var result = await _repository.DeleteCategoryAsync(categoryId);
+            if (!result)
+                throw new NotFoundException($"Category with ID {categoryId} not found.");
+        }
+
+        public async Task DeleteKeywordAsync(int keywordId)
+        {
+            var result = await _repository.DeleteKeywordAsync(keywordId);
+            if (!result)
+                throw new NotFoundException($"Keyword with ID {keywordId} not found.");
+        }
+
+        public async Task<bool> HideCategoryAsync(int categoryId)
+        {
+            var category = await _repository.GetByIdAsync(categoryId);
+            if (category == null)
+                throw new NotFoundException($"Category with ID {categoryId} not found.");
+
+            await _repository.HideCategoryAsync(category);
+            return true;
+        }
+
+        public async Task<bool> UnhideCategoryAsync(int categoryId)
+        {
+            var category = await _repository.GetByIdAsync(categoryId);
+            if (category == null)
+                throw new NotFoundException($"Category with ID {categoryId} not found.");
+
+            await _repository.UnhideCategoryAsync(category);
+            return true;
+        }
+
+        public async Task<int> BlockArticlesByKeywordAsync(string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                throw new ValidationException("Keyword must not be empty.");
+
+            return await _repository.BlockArticlesByKeywordAsync(keyword);
+        }
+    }
+}
